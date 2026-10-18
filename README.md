@@ -38,7 +38,7 @@ npm run dev
 - **Prøvemodus:** 20 spørsmål uten tilbakemelding underveis. Du får resultat med forklaringer til slutt.
 - Fremgangen (riktig-prosent per tema, antall scenarioer og prøveresultater) lagres i `localStorage`.
 
-Hurtigtaster: `1–4` eller `A–D` velger svar, `J`/`N` svarer ja/nei, og `Enter` går videre.
+Du kan endre valget ditt helt til du trykker «Svar». Hurtigtaster: `1–4` eller `A–D` velger svar, `J`/`N` velger ja/nei, og `Enter` sender svaret eller går videre.
 
 ## Struktur
 - `src/scenarios/` – én datafil per scenario (hentes automatisk), pluss rutehjelpere (`routes.ts`)

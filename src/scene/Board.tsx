@@ -282,6 +282,7 @@ export function Board() {
   const selected = useGame((s) => s.selected);
   const highlight = useGame((s) => s.highlight);
   const picks = useGame((s) => s.picks);
+  const draft = useGame((s) => s.draft);
   const answers = useGame((s) => s.answers);
   const showAllRoutes = useGame((s) => s.showAllRoutes);
   const question = useCurrentQuestion();
@@ -337,7 +338,8 @@ export function Board() {
   const picking = !driving && isSceneQuestion(question) && !answers[question!.id];
 
   const interactive = (kind: SelectionKind, id: string) => ({
-    selected: selected?.kind === kind && selected.id === id,
+    // Under klikkspørsmål markeres det valgte (ikke sendte) svaret.
+    selected: picking ? draft === id : selected?.kind === kind && selected.id === id,
     hovered: hovered === id,
     highlighted: highlight.includes(id),
     handlers: {

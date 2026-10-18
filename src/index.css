@@ -632,3 +632,5 @@ button.hud-brand:hover { border-color: var(--bp-accent); }
 .catalog-detail strong { display: block; font-size: 17px; margin-bottom: 4px; }
 .catalog-detail p { margin: 8px 0 0; line-height: 1.5; }
 .menu-links { display: flex; gap: 16px; }
+.btn-submit { margin-top: 14px; width: 100%; }
+.btn-primary:disabled { opacity: 0.35; cursor: default; background: var(--bp-accent); }

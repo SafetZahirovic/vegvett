@@ -79,15 +79,23 @@ function Feedback({ q, answer, scenario }: { q: Question; answer: Answer; scenar
 /** Instruksjon og valg så langt for klikk-/rekkefølgespørsmål. */
 function ScenePrompt({ q, scenario }: { q: Question; scenario: Scenario }) {
   const picks = useGame((s) => s.picks);
+  const draft = useGame((s) => s.draft);
   const resetPicks = useGame((s) => s.resetPicks);
   if (q.type === "click") {
-    return <p className="scene-hint">Klikk på riktig objekt i tegningen.</p>;
+    return (
+      <p className="scene-hint">
+        {draft
+          ? `Valgt: ${objectName(scenario, String(draft))}. Klikk på noe annet for å bytte.`
+          : "Klikk på riktig objekt i tegningen."}
+      </p>
+    );
   }
   if (q.type !== "order") return null;
   return (
     <div className="scene-order">
       <p className="scene-hint">
-        Klikk på kjøretøyene i den rekkefølgen de skal kjøre ({picks.length} / {q.correct.length}).
+        Klikk på kjøretøyene i den rekkefølgen de skal kjøre ({picks.length} / {q.correct.length}). Klikk på et
+        valgt kjøretøy igjen for å ta det ut.
       </p>
       {picks.length > 0 && (
         <>
@@ -113,7 +121,9 @@ export function QuestionPanel() {
   const exam = useGame((s) => s.exam);
   const examComplete = useExamComplete();
   const isExam = !!exam;
-  const { answer, nextQuestion, advance, finishExam } = useGame.getState();
+  const draft = useGame((s) => s.draft);
+  const picks = useGame((s) => s.picks);
+  const { setDraft, submit, nextQuestion, advance, finishExam } = useGame.getState();
 
   const q = scenario.questions[qIndex] as Question | undefined;
   const options = useMemo(() => (q ? optionsFor(q) : []), [q]);
@@ -125,7 +135,10 @@ export function QuestionPanel() {
   }, [given]);
   const isLast = qIndex === scenario.questions.length - 1;
 
-  // Hurtigtaster: 1–4 / A–D velger svar, J/N for ja/nei, Enter går videre.
+  // Klar til å sende: et valgt alternativ, eller hele rekkefølgen.
+  const ready = q?.type === "order" ? picks.length === q.correct.length : draft !== null;
+
+  // Hurtigtaster: 1–4 / A–D velger svar, J/N for ja/nei, Enter sender svaret eller går videre.
   useEffect(() => {
     if (driving || !q) return;
     const onKey = (e: KeyboardEvent) => {
@@ -133,8 +146,12 @@ export function QuestionPanel() {
       const key = e.key.toLowerCase();
       if (!given) {
         const i = "1234".indexOf(key) >= 0 ? "1234".indexOf(key) : "abcd".indexOf(key);
-        if (q.type === "yesno" && (key === "j" || key === "n")) return answer(q, key === "j");
-        if (i >= 0 && options[i]) return answer(q, options[i].value);
+        if (q.type === "yesno" && (key === "j" || key === "n")) return setDraft(key === "j");
+        if (i >= 0 && options[i]) return setDraft(options[i].value);
+        if (key === "enter" && ready) {
+          e.preventDefault();
+          submit();
+        }
         return;
       }
       if (key !== "enter") return;
@@ -145,7 +162,7 @@ export function QuestionPanel() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [q, given, options, isLast, examComplete, driving]);
+  }, [q, given, options, isLast, examComplete, driving, ready]);
 
   if (driving || !q) return null;
 
@@ -184,7 +201,9 @@ export function QuestionPanel() {
           {options.map((o, i) => {
             const chosen = given?.value === o.value;
             const state = !given
-              ? ""
+              ? draft === o.value
+                ? " is-chosen"
+                : ""
               : isExam
                 ? chosen
                   ? " is-chosen"
@@ -199,7 +218,8 @@ export function QuestionPanel() {
                 key={String(o.value)}
                 className={`option${state}`}
                 disabled={!!given}
-                onClick={() => answer(q, o.value)}
+                aria-pressed={!given && draft === o.value}
+                onClick={() => setDraft(o.value)}
               >
                 {q.type === "choice" && <span className="option-key">{String.fromCharCode(65 + i)}</span>}
                 <span>{o.label}</span>
@@ -209,6 +229,11 @@ export function QuestionPanel() {
         </div>
       )}
       {!given && <ScenePrompt q={q} scenario={scenario} />}
+      {!given && (
+        <button className="btn btn-primary btn-submit" onClick={submit} disabled={!ready}>
+          Svar
+        </button>
+      )}
       {given &&
         (isExam ? (
           <p className="scene-hint">Svaret er registrert. Du får se fasit og forklaring når prøven er ferdig.</p>

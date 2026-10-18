@@ -67,12 +67,17 @@ type GameState = {
   focusToken: number;
   /** Klikk så langt i et rekkefølgespørsmål. */
   picks: string[];
+  /** Valgt, men ikke sendt svar. Kan endres helt til spilleren trykker «Svar». */
+  draft: AnswerValue | null;
   /** «Vis alle kjøreretninger». */
   showAllRoutes: boolean;
   answer: (q: Question, value: AnswerValue) => void;
   /** Klikk på et objekt i tegningen mens et klikk-/rekkefølgespørsmål er aktivt. */
   pickInScene: (id: string) => void;
   resetPicks: () => void;
+  setDraft: (value: AnswerValue | null) => void;
+  /** Send valgt svar (eller rekkefølgen som er klikket) for spørsmålet som vises. */
+  submit: () => void;
   nextQuestion: () => void;
   toggleAllRoutes: () => void;
   setHovered: (id: string | null) => void;
@@ -101,6 +106,7 @@ const freshScenario = (): Partial<GameState> => ({
   qIndex: 0,
   answers: {},
   picks: [],
+  draft: null,
   highlight: [],
   selected: null,
   hovered: null,
@@ -124,6 +130,7 @@ export const useGame = create<GameState>((set, get) => ({
   highlight: [],
   focusToken: 0,
   picks: [],
+  draft: null,
   showAllRoutes: false,
   setHovered: (id) => set({ hovered: id }),
   select: (selected) => set({ selected }),
@@ -138,12 +145,14 @@ export const useGame = create<GameState>((set, get) => ({
     if (mode === "prove" && exam) {
       // Prøvemodus: ingen tilbakemelding før til slutt.
       set({
+        draft: null,
         answers: { ...answers, [q.id]: { value, correct } },
         exam: { ...exam, log: [...exam.log, { scenarioId: scenario.id, questionId: q.id, value, correct }] },
       });
       return;
     }
     set((s) => ({
+      draft: null,
       answers: { ...s.answers, [q.id]: { value, correct } },
       // Feil svar: vis de relevante objektene og flytt kartet dit.
       highlight: correct ? [] : q.highlight,
@@ -151,17 +160,29 @@ export const useGame = create<GameState>((set, get) => ({
     }));
   },
   pickInScene: (id) => {
-    const { index, qIndex, answers, picks, answer } = get();
+    const { index, qIndex, answers, picks, draft } = get();
     const q = SCENARIOS[index].questions[qIndex];
     if (!q || answers[q.id]) return;
-    if (q.type === "click") return answer(q, id);
-    if (q.type !== "order" || picks.includes(id)) return;
-    const next = [...picks, id];
-    set({ picks: next });
-    if (next.length === q.correct.length) answer(q, next.join(","));
+    // Klikk: velg (eller fjern) et objekt. Svaret sendes først med «Svar».
+    if (q.type === "click") return set({ draft: draft === id ? null : id });
+    if (q.type !== "order") return;
+    // Rekkefølge: klikk på et valgt kjøretøy igjen for å ta det ut av rekkefølgen.
+    if (picks.includes(id)) return set({ picks: picks.filter((p) => p !== id) });
+    if (picks.length < q.correct.length) set({ picks: [...picks, id] });
   },
   resetPicks: () => set({ picks: [] }),
-  nextQuestion: () => set((s) => ({ qIndex: s.qIndex + 1, highlight: [], picks: [] })),
+  setDraft: (draft) => set({ draft }),
+  submit: () => {
+    const { index, qIndex, answers, picks, draft, answer } = get();
+    const q = SCENARIOS[index].questions[qIndex];
+    if (!q || answers[q.id]) return;
+    if (q.type === "order") {
+      if (picks.length === q.correct.length) answer(q, picks.join(","));
+      return;
+    }
+    if (draft !== null) answer(q, draft);
+  },
+  nextQuestion: () => set((s) => ({ qIndex: s.qIndex + 1, highlight: [], picks: [], draft: null })),
   toggleAllRoutes: () => set((s) => ({ showAllRoutes: !s.showAllRoutes })),
   advance: () => {
     const { next, index, mode, exam, recent } = get();

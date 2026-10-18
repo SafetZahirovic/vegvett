@@ -11,6 +11,10 @@ type ProgressState = {
   scenariosPlayed: number;
   /** Prøveresultater (prosent riktige), nyeste sist. */
   exams: { date: string; correct: number; total: number }[];
+  /** Når hvert scenario sist ble vist (løpenummer), så nye økter starter med det du ikke har sett. */
+  lastSeen: Record<string, number>;
+  seenCounter: number;
+  markSeen: (scenarioId: string) => void;
   recordAnswer: (topic: Topic, correct: boolean) => void;
   recordScenario: () => void;
   recordExam: (correct: number, total: number) => void;
@@ -48,6 +52,9 @@ export const useProgress = create<ProgressState>()(
       topics: {},
       scenariosPlayed: 0,
       exams: [],
+      lastSeen: {},
+      seenCounter: 0,
+      markSeen: (id) => set((s) => ({ seenCounter: s.seenCounter + 1, lastSeen: { ...s.lastSeen, [id]: s.seenCounter + 1 } })),
       recordAnswer: (topic, correct) =>
         set((s) => {
           const prev = s.topics[topic] ?? { correct: 0, total: 0 };
@@ -56,7 +63,7 @@ export const useProgress = create<ProgressState>()(
       recordScenario: () => set((s) => ({ scenariosPlayed: s.scenariosPlayed + 1 })),
       recordExam: (correct, total) =>
         set((s) => ({ exams: [...s.exams, { date: new Date().toISOString(), correct, total }].slice(-20) })),
-      reset: () => set({ topics: {}, scenariosPlayed: 0, exams: [] }),
+      reset: () => set({ topics: {}, scenariosPlayed: 0, exams: [], lastSeen: {}, seenCounter: 0 }),
     }),
     { name: "vegvett-progress", version: 1, storage: createJSONStorage(() => safeStorage) },
   ),

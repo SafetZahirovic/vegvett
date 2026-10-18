@@ -3,14 +3,11 @@ import type { Question, Scenario } from "../scenarios/types";
 import { EXAM_LENGTH, useExamComplete, useGame, useScenario, type Answer, type AnswerValue } from "../state/store";
 import { objectName } from "./labels";
 
-/** Stabil stokking per spørsmål, så riktig svar ikke alltid står på samme plass. */
-function shuffled<T>(items: T[], seed: string): T[] {
-  let h = 2166136261;
-  for (const c of seed) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+/** Tilfeldig rekkefølge på svaralternativene, ny hver gang spørsmålet vises. */
+function shuffled<T>(items: T[]): T[] {
   const out = [...items];
   for (let i = out.length - 1; i > 0; i--) {
-    h = Math.imul(h ^ (h >>> 13), 0x5bd1e995);
-    const j = (h >>> 0) % (i + 1);
+    const j = Math.floor(Math.random() * (i + 1));
     [out[i], out[j]] = [out[j], out[i]];
   }
   return out;
@@ -23,7 +20,7 @@ function optionsFor(q: Question): { value: AnswerValue; label: string }[] {
       { value: false, label: "Nei" },
     ];
   }
-  if (q.type === "choice") return shuffled(q.options, q.id).map((o) => ({ value: o.id, label: o.text }));
+  if (q.type === "choice") return shuffled(q.options).map((o) => ({ value: o.id, label: o.text }));
   return [];
 }
 

@@ -195,7 +195,8 @@ export const useGame = create<GameState>((set, get) => ({
       target = exam.order[exam.pos + 1];
       set({ exam: { ...exam, pos: exam.pos + 1 } });
     } else {
-      target = pickScenario(useProgress.getState().topics, new Set([current, ...recent]));
+      const { topics, lastSeen } = useProgress.getState();
+      target = pickScenario(topics, new Set([current, ...recent]), lastSeen);
     }
     set({
       next: target,
@@ -208,14 +209,17 @@ export const useGame = create<GameState>((set, get) => ({
     });
   },
   startPractice: () => {
-    const { topics, scenariosPlayed } = useProgress.getState();
+    const { topics, scenariosPlayed, lastSeen, markSeen } = useProgress.getState();
     // Første gang: begynn med den rolige landeveien.
     const first = Math.max(0, SCENARIOS.findIndex((s) => s.id === FIRST_SCENARIO_ID));
-    const index = scenariosPlayed === 0 ? first : pickScenario(topics, new Set());
+    const index = scenariosPlayed === 0 ? first : pickScenario(topics, new Set(), lastSeen);
+    markSeen(SCENARIOS[index].id);
     set({ ...freshScenario(), mode: "ovelse", screen: "play", exam: null, index, next: null, recent: [], pose: START_POSE, travel: null });
   },
   startExam: () => {
-    const order = shuffledScenarioOrder();
+    const { lastSeen, markSeen } = useProgress.getState();
+    const order = shuffledScenarioOrder(lastSeen);
+    markSeen(SCENARIOS[order[0]].id);
     set({
       ...freshScenario(),
       mode: "prove",
@@ -238,7 +242,9 @@ export const useGame = create<GameState>((set, get) => ({
   },
   setScreen: (screen) => set({ screen, selected: null }),
   setProgress: (progress) => set({ progress }),
-  finishTransition: () =>
+  finishTransition: () => {
+    const { next } = get();
+    if (next !== null) useProgress.getState().markSeen(SCENARIOS[next].id);
     set((s) => ({
       ...freshScenario(),
       index: s.next ?? s.index,
@@ -246,7 +252,8 @@ export const useGame = create<GameState>((set, get) => ({
       travel: null,
       next: null,
       progress: 0,
-    })),
+    }));
+  },
 }));
 
 export const useScenario = (): Scenario => useGame((s) => SCENARIOS[s.index]);

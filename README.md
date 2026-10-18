@@ -34,7 +34,7 @@ npm run dev
 - `?ark=7` i adressen starter direkte på scenario nr. 7 (sortert etter vanskelighetsgrad og tittel) og hopper over menyen.
 
 ## Moduser
-- **Øvingsmodus:** forklaring etter hvert svar. Scenarioer velges tilfeldig, men oftere fra temaer du har svart feil på.
+- **Øvingsmodus:** forklaring etter hvert svar. Spillet husker hvilke scenarioer du har sett (også mellom økter) og velger blant dem du ikke har sett på lengst, oftere fra temaer du har svart feil på. Minst 29 andre scenarioer passerer før et scenario kommer igjen. Svaralternativene stokkes på nytt hver gang.
 - **Prøvemodus:** 20 spørsmål uten tilbakemelding underveis. Du får resultat med forklaringer til slutt.
 - Fremgangen (riktig-prosent per tema, antall scenarioer og prøveresultater) lagres i `localStorage`.
 

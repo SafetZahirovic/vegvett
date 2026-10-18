@@ -7,16 +7,34 @@ const UNSEEN_ERROR_RATE = 0.4;
 /** Hvor mye feilandelen trekker opp sannsynligheten. 1 + 4 × 100 % feil = 5 ganger så ofte. */
 const ERROR_WEIGHT = 4;
 
+/** Andel av scenarioene (de minst nylig sette) som det trekkes fra. Resten venter på tur. */
+const FRESH_SHARE = 0.2;
+const MIN_POOL = 4;
+
+/** Scenarioindekser sortert fra minst nylig sett (aldri sett først), tilfeldig ved likhet. */
+function byFreshness(lastSeen: Record<string, number>, random: () => number): number[] {
+  const tie = new Map(SCENARIOS.map((s) => [s.id, random()]));
+  return SCENARIOS.map((_, i) => i).sort((a, b) => {
+    const da = lastSeen[SCENARIOS[a].id] ?? 0;
+    const db = lastSeen[SCENARIOS[b].id] ?? 0;
+    return da - db || tie.get(SCENARIOS[a].id)! - tie.get(SCENARIOS[b].id)!;
+  });
+}
+
 /**
- * Velger et scenario tilfeldig, vektet mot temaer spilleren har svart feil på.
- * `exclude` er scenario-id-er som ikke skal velges (f.eks. de siste som er spilt).
+ * Velger et scenario blant dem du har sett minst nylig (også på tvers av økter), vektet
+ * mot temaer du har svart feil på. Slik går alle scenarioene runden før noe gjentas.
+ * `exclude` er scenario-id-er som ikke skal velges (f.eks. det som spilles nå).
  */
 export function pickScenario(
   topics: Partial<Record<Topic, TopicStat>>,
   exclude: Set<string>,
+  lastSeen: Record<string, number> = {},
   random = Math.random,
 ): number {
-  let candidates = SCENARIOS.map((s, i) => ({ s, i })).filter(({ s }) => !exclude.has(s.id));
+  const ordered = byFreshness(lastSeen, random).filter((i) => !exclude.has(SCENARIOS[i].id));
+  const poolSize = Math.max(MIN_POOL, Math.ceil(SCENARIOS.length * FRESH_SHARE));
+  let candidates = ordered.slice(0, poolSize).map((i) => ({ s: SCENARIOS[i], i }));
   if (candidates.length === 0) candidates = SCENARIOS.map((s, i) => ({ s, i }));
   const weights = candidates.map(({ s }) => 1 + ERROR_WEIGHT * (errorRate(topics[s.topic]) ?? UNSEEN_ERROR_RATE));
   let r = random() * weights.reduce((a, b) => a + b, 0);
@@ -27,12 +45,7 @@ export function pickScenario(
   return candidates[candidates.length - 1].i;
 }
 
-/** Stokker scenarioer til en prøve (uten gjentakelser). */
-export function shuffledScenarioOrder(random = Math.random): number[] {
-  const order = SCENARIOS.map((_, i) => i);
-  for (let i = order.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [order[i], order[j]] = [order[j], order[i]];
-  }
-  return order;
+/** Rekkefølge for en prøve: scenarioene du har sett minst nylig først, ellers tilfeldig. */
+export function shuffledScenarioOrder(lastSeen: Record<string, number> = {}, random = Math.random): number[] {
+  return byFreshness(lastSeen, random);
 }

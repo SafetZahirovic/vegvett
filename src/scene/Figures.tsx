@@ -1,8 +1,8 @@
-import type { CSSProperties, SVGProps } from "react";
+import { useId, type CSSProperties, type SVGProps } from "react";
 import type { Animal, AnimalType, Decor, Heading, Pedestrian, SignPlacement, Vec2, VehicleType } from "../scenarios/types";
 import { getSign } from "../signs/registry";
 import { shapePoints } from "../signs/shapes";
-import { getSignDataUrl } from "../signs/textures";
+import { signImage } from "../signs/official";
 import { P, boxFaces, facesViewer, groundEllipse, headingVec, pts, rightOf } from "./iso";
 
 /**
@@ -54,6 +54,10 @@ export function SignFigure({
   const [bx, by] = P(u, v, 0);
   const s = SIGN_SIZE;
   const shape = shapePoints(def.shape);
+  const img = signImage(sign.code, sign.value);
+  // Offisielle bilder har hvit bakgrunn i hjørnene: klipp dem til skiltets form.
+  const clipId = useId();
+  const clipScale = 0.985;
   const outline = shape ? (
     <polygon points={shape.map(([x, y]) => `${x * s},${-y * s}`).join(" ")} />
   ) : (
@@ -69,14 +73,26 @@ export function SignFigure({
       <g transform={`matrix(${rx} ${ry} 0 1 ${cx} ${cy})`}>
         <g className="sign-plate">
           {front ? (
-            <image
-              href={getSignDataUrl(sign.code, sign.value)}
-              x={-s / 2}
-              y={-s / 2}
-              width={s}
-              height={s}
-              preserveAspectRatio="none"
-            />
+            <>
+              {img.official && def.shape !== "square" && (
+                <clipPath id={clipId}>
+                  {shape ? (
+                    <polygon points={shape.map(([x, y]) => `${x * s * clipScale},${-y * s * clipScale}`).join(" ")} />
+                  ) : (
+                    <circle r={(s / 2) * clipScale} />
+                  )}
+                </clipPath>
+              )}
+              <image
+                href={img.url}
+                x={-s / 2}
+                y={-s / 2}
+                width={s}
+                height={s}
+                preserveAspectRatio={img.official ? "xMidYMid meet" : "none"}
+                clipPath={img.official && def.shape !== "square" ? `url(#${clipId})` : undefined}
+              />
+            </>
           ) : (
             <g className="sign-back">{outline}</g>
           )}

@@ -11,7 +11,7 @@ og fotgjengere for å se hva de betyr og hvor de skal kjøre. Deretter svarer du
 Svarer du feil, får du en kort forklaring med henvisning til regelen, og det som gjelder, blir
 markert i tegningen.
 
-Spillet har 35 scenarioer og over 50 skilt. Det dekker blant annet vikeplikt og høyreregelen,
+Spillet har 35 scenarioer, bruker Statens vegvesens offisielle skiltbilder, og har en skiltoversikt med alle 329 skiltene. Det dekker blant annet vikeplikt og høyreregelen,
 forkjørsveg, stopp, rundkjøring, gangfelt, gang- og sykkelveg, buss ved holdeplass, utrykningskjøretøy,
 sperre- og varsellinje, forbikjøring, møteplikt, vegarbeid, motorveg, parkering og stans, fartsgrenser,
 fareskilt og dyr i vegen (elg, rein og sau). Mellom scenarioene kjører bilen ruten sin: den svinger i
@@ -52,6 +52,13 @@ Hurtigtaster: `1–4` eller `A–D` velger svar, `J`/`N` svarer ja/nei, og `Ente
 2. Endre id, veitype, skilt, oppmerking, kjøretøy og spørsmål.
 3. Ferdig – filen blir plukket opp automatisk. Før opp regelpåstandene i `CONTENT_REVIEW.md`.
 
+## Skiltsymboler
+
+Skiltbildene i `public/skilt/` er Statens vegvesens offisielle symboler, fra symbolpakken
+[«Trafikkskilt» i Geonorges symbolregister](https://register.geonorge.no/symbol/symbolpackages/details/1e2f592a-1d69-45a3-9ce1-e55a64fe1dc3).
+De er ikke omfattet av MIT-lisensen, og registeret oppgir ikke egne bruksvilkår. Alle skiltene kan
+blas gjennom under «Skiltoversikt» i menyen.
+
 ## Lisens
 
-[MIT](LICENSE)
+Koden er lisensiert under [MIT](LICENSE). Skiltsymbolene tilhører Statens vegvesen (se over).

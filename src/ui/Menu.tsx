@@ -33,9 +33,14 @@ export function Menu() {
               ? `${played} scenarioer spilt · ${total ? Math.round((correct / total) * 100) : 0} % riktige`
               : "Ingen fremgang lagret ennå"}
           </span>
-          <button className="link" onClick={() => setScreen("stats")}>
-            Statistikk
-          </button>
+          <span className="menu-links">
+            <button className="link" onClick={() => setScreen("signs")}>
+              Skiltoversikt
+            </button>
+            <button className="link" onClick={() => setScreen("stats")}>
+              Statistikk
+            </button>
+          </span>
         </div>
       </section>
     </div>

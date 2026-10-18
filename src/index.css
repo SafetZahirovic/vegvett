@@ -214,7 +214,10 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 }
 .inspect h2 { margin: 8px 0 12px; font-size: 20px; font-weight: 650; }
 .inspect p { margin: 0 0 10px; line-height: 1.5; font-size: 15px; }
-.inspect-sign { display: block; width: 140px; height: 140px; margin: 4px auto 8px; }
+.inspect-sign { display: grid; place-items: center; width: 160px; height: 160px; margin: 4px auto 8px; }
+.inspect-sign img { max-width: 100%; max-height: 100%; }
+/* Offisielle bilder har hvit bakgrunn: vis dem på en lys flis */
+.inspect-sign.is-official { background: #f4f6f9; border-radius: 10px; padding: 12px; }
 .inspect-meta {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -577,3 +580,55 @@ button.hud-brand:hover { border-color: var(--bp-accent); }
 .animal .antler { fill: none; stroke: var(--car); stroke-width: 1.4; vector-effect: non-scaling-stroke; stroke-linecap: round; }
 .verge { fill: var(--bp-bg); }
 .guardrail { stroke: var(--bp-line); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+
+/* ---------- Skiltoversikt ---------- */
+
+.catalog { width: min(900px, 100%); }
+.catalog-search {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--bp-border);
+  background: var(--bp-bg);
+  color: var(--bp-line);
+  font: inherit;
+  font-size: 15px;
+}
+.catalog-search:focus { outline: none; border-color: var(--bp-accent); }
+.catalog-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+}
+.catalog-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px 6px;
+  border: 1px solid transparent;
+  background: #f4f6f9;
+  color: #1b2430;
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+.catalog-item img { width: 60px; height: 60px; object-fit: contain; }
+.catalog-item.is-known { box-shadow: inset 0 -3px 0 var(--bp-accent); }
+.catalog-item:hover, .catalog-item.is-open { border-color: var(--bp-amber); }
+.catalog-detail {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--bp-amber);
+}
+.catalog-detail img { width: 96px; height: 96px; object-fit: contain; flex: none; background: #f4f6f9; padding: 8px; }
+.catalog-detail strong { display: block; font-size: 17px; margin-bottom: 4px; }
+.catalog-detail p { margin: 8px 0 0; line-height: 1.5; }
+.menu-links { display: flex; gap: 16px; }

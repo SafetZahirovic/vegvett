@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { PLAYER_ID } from "../scenarios/types";
 import { CATEGORY_LABEL, getSign, signTitle } from "../signs/registry";
-import { getSignDataUrl } from "../signs/textures";
+import { signImage } from "../signs/official";
 import { useGame, useHiddenSigns, useScenario } from "../state/store";
 import { ANIMAL_LABEL, INDICATOR_LABEL, TURN_LABEL, VEHICLE_LABEL } from "./labels";
 
@@ -19,7 +19,12 @@ export function InspectPanel() {
     const placement = scenario.signs.find((s) => s.id === selected.id);
     if (!placement) return null;
     const def = getSign(placement.code);
-    const img = <img className="inspect-sign" src={getSignDataUrl(placement.code, placement.value)} alt="" />;
+    const art = signImage(placement.code, placement.value);
+    const img = (
+      <div className={`inspect-sign${art.official ? " is-official" : ""}`}>
+        <img src={art.url} alt="" />
+      </div>
+    );
     // Et ubesvart spørsmål spør etter dette skiltet: ikke røp svaret.
     body = hiddenSigns.has(placement.id) ? (
       <>

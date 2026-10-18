@@ -6,7 +6,7 @@ import { useProgress } from "./progress";
 import { pickScenario, shuffledScenarioOrder } from "./selection";
 
 export type Mode = "ovelse" | "prove";
-export type Screen = "menu" | "play" | "result" | "stats";
+export type Screen = "menu" | "play" | "result" | "stats" | "signs";
 
 /** Antall spørsmål i en prøve. */
 export const EXAM_LENGTH = 20;

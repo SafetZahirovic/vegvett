@@ -22,6 +22,20 @@ bestemmelser, den andre de enkelte skiltene:
 §§ 3–4 fareskilt · §§ 5–6 vikeplikt- og forkjørsskilt · §§ 7–8 forbudsskilt · §§ 9–10 påbudsskilt ·
 §§ 11–12 opplysningsskilt · §§ 21–22 vegoppmerking.
 
+## Skiltbilder
+
+Spillet bruker de **offisielle skiltsymbolene fra Statens vegvesen**, fra symbolpakken «Trafikkskilt»
+i Geonorges symbolregister. Filene ligger i `public/skilt/` (329 SVG-er), og lista over dem står i
+`src/signs/official-ids.ts`. Skilt uten offisiell fil (100.1, 149) tegnes i kode.
+
+- ☐ **Bruksvilkår:** Geonorge-siden oppgir ingen lisens, bare «Kilde: Statens vegvesen». ⚠ Avklar
+  vilkårene med Statens vegvesen/Geonorge før appen deles bredt. Kilden er oppgitt i appen
+  (Skiltoversikt) og i README.
+- ☐ Filene `farlig-sving-til-venstre`, `farlige-svinger-den-foerste-til-hoeyre` og `trafikkulykke` er
+  lagt inn som 100_2, 102_1 og 153_0. `skarp-sving-til-hoeyre`, `feil-kjoereretning`, `kjetting` og
+  `midtstilt-sykkelfelt` er ikke tatt med, fordi nummeret er ukjent.
+- ☐ 516 Gangfelt bruker varianten 516_H.
+
 ## Skilt (`src/signs/registry.ts`)
 
 | Status | Kode | Navn | Kategori | Påstand / forklaring | Henvisning |
@@ -37,7 +51,7 @@ bestemmelser, den andre de enkelte skiltene:
 | ☐ | 406 | Påbudt rundkjøring | Påbudsskilt | Kjør mot klokka rundt midtøya. | SF § 10 |
 | ☐ | 516 | Gangfelt | Opplysningsskilt | Viser gangfelt. Vikeplikt for gående som er i gangfeltet eller på vei ut i det. | SF § 12, TR § 9 nr. 2 |
 
-Tegningene er forenklet. Kategorien vises som «Vikeplikt- og forkjørsskilt», etter skiltforskriften §§ 5–6.
+Bildene er offisielle (se over). Kategorien vises som «Vikeplikt- og forkjørsskilt», etter skiltforskriften §§ 5–6.
 
 ## Vegoppmerking (`src/scene/Ground.tsx`)
 
@@ -102,7 +116,7 @@ Alle scenarioer har høyretrafikk: spilleren kjører i høyre felt, og møtende 
 
 ## Nye skilt (`src/signs/more.ts`)
 
-Numre og navn er kontrollert mot skiltforskriften av en AI-agent. Utseendet er forenklet.
+Numre og navn er kontrollert mot skiltforskriften av en AI-agent. Bildene er de offisielle (se «Skiltbilder»).
 
 | Status | Kode | Navn | Kategori | Påstand / forklaring | Henvisning |
 |---|---|---|---|---|---|
@@ -120,12 +134,12 @@ Numre og navn er kontrollert mot skiltforskriften av en AI-agent. Utseendet er f
 | ☐ | 142 | Barn | Fareskilt | Sted der barn ofte ferdes. | SF § 4 |
 | ☐ | 144 | Syklende | Fareskilt | Syklende krysser eller kjører ofte ut i vegen. | SF § 4 |
 | ☐ | 146.1–146.5 | Elg, Rein, Hjort, Ku, Sau | Fareskilt | Dyr ferdes ofte over eller langs vegen. ⚠ «Særlig i skumring og mørke» er et råd, ikke lovtekst. | SF § 4 |
-| ☐ | 148 | Møtende trafikk | Fareskilt | Trafikk i begge retninger. ⚠ Pilenes plassering er middels sikker. | SF § 4 |
+| ☐ | 148 | Møtende trafikk | Fareskilt | Trafikk i begge retninger. | SF § 4 |
 | ☐ | 149 | Kø | Fareskilt | Varsler kø. | SF § 4 |
 | ☐ | 156 | Annen fare | Fareskilt | Fare uten eget skilt. | SF § 4 |
 | ☐ | 210 | Forkjørskryss | Vikeplikt- og forkjørsskilt | Trafikk fra sidevegene har vikeplikt. | SF § 6 |
-| ☐ | 212 | Vikeplikt overfor møtende kjørende | Vikeplikt- og forkjørsskilt | Ikke kjør inn på smalt parti hvis du hindrer møtende. ⚠ Pilfarger er middels sikre. | SF § 6 |
-| ☐ | 214 | Møtende kjørende har vikeplikt | Vikeplikt- og forkjørsskilt | Møtende har vikeplikt for deg. ⚠ Pilfarger er middels sikre. | SF § 6 |
+| ☐ | 212 | Vikeplikt overfor møtende kjørende | Vikeplikt- og forkjørsskilt | Ikke kjør inn på smalt parti hvis du hindrer møtende. | SF § 6 |
+| ☐ | 214 | Møtende kjørende har vikeplikt | Vikeplikt- og forkjørsskilt | Møtende har vikeplikt for deg. | SF § 6 |
 | ☐ | 306.1 | Forbudt for motorvogn | Forbudsskilt | Unntatt liten elektrisk motorvogn. | SF § 8 |
 | ☐ | 306.6 | Forbudt for syklende | Forbudsskilt | Også liten elektrisk motorvogn. | SF § 8 |
 | ☐ | 330.1 / 330.2 | Svingeforbud (høyre / venstre) | Forbudsskilt | Gjelder i krysset ved skiltet eller første kryss etter. | SF § 8 |

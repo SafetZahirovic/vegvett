@@ -4,6 +4,7 @@ import { ExamResult } from "./ui/ExamResult";
 import { Hud } from "./ui/Hud";
 import { InspectPanel } from "./ui/InspectPanel";
 import { Menu } from "./ui/Menu";
+import { SignCatalog } from "./ui/SignCatalog";
 import { QuestionPanel } from "./ui/QuestionPanel";
 import { Stats } from "./ui/Stats";
 
@@ -22,6 +23,7 @@ export function App() {
       {screen === "menu" && <Menu />}
       {screen === "stats" && <Stats />}
       {screen === "result" && <ExamResult />}
+      {screen === "signs" && <SignCatalog />}
     </div>
   );
 }

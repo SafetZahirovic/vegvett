@@ -63,5 +63,15 @@ export const hoyreregelen: Scenario = {
       rule: "Trafikkreglene § 7 nr. 2 (høyreregelen)",
       highlight: ["fra-hoyre", "fra-venstre", PLAYER_ID],
     },
+    {
+      id: "hr-syklist",
+      type: "yesno",
+      prompt: "Gjelder høyreregelen også overfor en syklist som kommer fra høyre på kjørebanen?",
+      correct: true,
+      explanation:
+        "En syklist på kjørebanen er kjørende, og høyreregelen gjelder. Kommer syklisten fra sykkelveg, gang- og sykkelveg eller fortau, har syklisten vikeplikt.",
+      rule: "Trafikkreglene § 7 nr. 2 og nr. 4",
+      highlight: [],
+    },
   ],
 };

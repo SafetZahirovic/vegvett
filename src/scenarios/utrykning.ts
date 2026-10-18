@@ -95,5 +95,14 @@ export const utrykning: Scenario = {
       rule: "Trafikkreglene § 10 nr. 1",
       highlight: ["motende", "ambulanse"],
     },
+    {
+      id: "utr-gront",
+      type: "yesno",
+      prompt: "Du har grønt lys i et kryss, og en ambulanse med blålys kommer fra siden. Må du gi fri veg?",
+      correct: true,
+      explanation: "Plikten til å gi fri veg for utrykningskjøretøy gjelder også når du har grønt lys.",
+      rule: "Trafikkreglene § 10 nr. 1",
+      highlight: ["ambulanse"],
+    },
   ],
 };

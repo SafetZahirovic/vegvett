@@ -64,5 +64,14 @@ export const elg: Scenario = {
       rule: "Vegtrafikkloven § 3",
       highlight: ["elgen"],
     },
+    {
+      id: "elg-ulykke",
+      type: "yesno",
+      prompt: "Du kolliderer med en elg. Må du stanse?",
+      correct: true,
+      explanation: "Den som er innblandet i en trafikkulykke, skal straks stanse og hjelpe skadde – også dyr.",
+      rule: "Vegtrafikkloven § 12",
+      highlight: ["elgen"],
+    },
   ],
 };

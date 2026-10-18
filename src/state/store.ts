@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { create } from "zustand";
 import { SCENARIOS } from "../scenarios";
 import type { Question, Scenario } from "../scenarios/types";
@@ -12,6 +13,21 @@ export type Screen = "menu" | "play" | "result" | "stats" | "signs";
 export const EXAM_LENGTH = 20;
 /** Scenarioet nye spillere starter med. */
 const FIRST_SCENARIO_ID = "landevei-80";
+/** Så mange spørsmål stilles per besøk i et scenario. Har scenarioet flere, trekkes de tilfeldig. */
+export const QUESTIONS_PER_VISIT = 3;
+
+/** Trekker spørsmål til et besøk: inntil QUESTIONS_PER_VISIT, i opprinnelig rekkefølge. */
+export function pickQuestionIds(scenario: Scenario): string[] {
+  const ids = scenario.questions.map((q) => q.id);
+  if (ids.length <= QUESTIONS_PER_VISIT) return ids;
+  const chosen = new Set([...ids].sort(() => Math.random() - 0.5).slice(0, QUESTIONS_PER_VISIT));
+  return ids.filter((id) => chosen.has(id));
+}
+
+/** Spørsmålene som stilles i dette besøket. */
+export const activeQuestions = (s: { index: number; qids: string[] }): Question[] =>
+  s.qids.map((id) => SCENARIOS[s.index].questions.find((q) => q.id === id)!).filter(Boolean);
+
 /** Antall nylig spilte scenarioer som ikke velges igjen i øvingsmodus. */
 const RECENT_LIMIT = 5;
 
@@ -58,8 +74,10 @@ type GameState = {
   selected: Selection;
   /** Økes for å be kartet sentrere på bilen igjen. */
   viewResetToken: number;
-  /** Spørsmålet som vises nå (indeks i scenarioets spørsmål). */
+  /** Spørsmålet som vises nå (indeks i qids). */
   qIndex: number;
+  /** Spørsmålene som er trukket til dette besøket i scenarioet. */
+  qids: string[];
   answers: Record<string, Answer>;
   /** Objekter (skilt/kjøretøy/oppmerking) som fremheves i scenen. */
   highlight: string[];
@@ -112,12 +130,15 @@ const freshScenario = (): Partial<GameState> => ({
   hovered: null,
 });
 
+const startIndex = startArk ?? 0;
+
 export const useGame = create<GameState>((set, get) => ({
   mode: "ovelse",
   screen: startArk === null ? "menu" : "play",
   exam: null,
   recent: [],
-  index: startArk ?? 0,
+  index: startIndex,
+  qids: pickQuestionIds(SCENARIOS[startIndex]),
   next: null,
   progress: 0,
   pose: START_POSE,
@@ -160,8 +181,8 @@ export const useGame = create<GameState>((set, get) => ({
     }));
   },
   pickInScene: (id) => {
-    const { index, qIndex, answers, picks, draft } = get();
-    const q = SCENARIOS[index].questions[qIndex];
+    const { qIndex, answers, picks, draft } = get();
+    const q = activeQuestions(get())[qIndex];
     if (!q || answers[q.id]) return;
     // Klikk: velg (eller fjern) et objekt. Svaret sendes først med «Svar».
     if (q.type === "click") return set({ draft: draft === id ? null : id });
@@ -173,8 +194,8 @@ export const useGame = create<GameState>((set, get) => ({
   resetPicks: () => set({ picks: [] }),
   setDraft: (draft) => set({ draft }),
   submit: () => {
-    const { index, qIndex, answers, picks, draft, answer } = get();
-    const q = SCENARIOS[index].questions[qIndex];
+    const { qIndex, answers, picks, draft, answer } = get();
+    const q = activeQuestions(get())[qIndex];
     if (!q || answers[q.id]) return;
     if (q.type === "order") {
       if (picks.length === q.correct.length) answer(q, picks.join(","));
@@ -214,7 +235,7 @@ export const useGame = create<GameState>((set, get) => ({
     const first = Math.max(0, SCENARIOS.findIndex((s) => s.id === FIRST_SCENARIO_ID));
     const index = scenariosPlayed === 0 ? first : pickScenario(topics, new Set(), lastSeen);
     markSeen(SCENARIOS[index].id);
-    set({ ...freshScenario(), mode: "ovelse", screen: "play", exam: null, index, next: null, recent: [], pose: START_POSE, travel: null });
+    set({ ...freshScenario(), qids: pickQuestionIds(SCENARIOS[index]), mode: "ovelse", screen: "play", exam: null, index, next: null, recent: [], pose: START_POSE, travel: null });
   },
   startExam: () => {
     const { lastSeen, markSeen } = useProgress.getState();
@@ -222,6 +243,7 @@ export const useGame = create<GameState>((set, get) => ({
     markSeen(SCENARIOS[order[0]].id);
     set({
       ...freshScenario(),
+      qids: pickQuestionIds(SCENARIOS[order[0]]),
       mode: "prove",
       screen: "play",
       exam: { order, pos: 0, log: [] },
@@ -247,6 +269,7 @@ export const useGame = create<GameState>((set, get) => ({
     if (next !== null) useProgress.getState().markSeen(SCENARIOS[next].id);
     set((s) => ({
       ...freshScenario(),
+      qids: pickQuestionIds(SCENARIOS[s.next ?? s.index]),
       index: s.next ?? s.index,
       pose: s.travel?.nextPose ?? s.pose,
       travel: null,
@@ -265,19 +288,26 @@ export const useExamComplete = (): boolean => useGame((s) => !!s.exam && s.exam.
 export const useScenarioDone = (): boolean =>
   useGame(
     (s) =>
-      SCENARIOS[s.index].questions.every((q) => s.answers[q.id]) ||
+      activeQuestions(s).every((q) => s.answers[q.id]) ||
       (!!s.exam && s.exam.log.length >= EXAM_LENGTH),
   );
 
 /** Skilt hvis navn skal skjules fordi et ubesvart spørsmål spør etter det. */
 export const useHiddenSigns = (): Set<string> => {
-  const scenario = useScenario();
+  const questions = useActiveQuestions();
   const answers = useGame((s) => s.answers);
   return new Set(
-    scenario.questions.flatMap((q) => (q.type === "choice" && q.hidesSign && !answers[q.id] ? [q.hidesSign] : [])),
+    questions.flatMap((q) => (q.type === "choice" && q.hidesSign && !answers[q.id] ? [q.hidesSign] : [])),
   );
 };
 
 /** Spørsmålet som vises nå, hvis noen. */
 export const useCurrentQuestion = (): Question | undefined =>
-  useGame((s) => SCENARIOS[s.index].questions[s.qIndex]);
+  useGame((s) => activeQuestions(s)[s.qIndex]);
+
+/** Spørsmålene i dette besøket (stabil referanse så lenge utvalget er det samme). */
+export const useActiveQuestions = (): Question[] => {
+  const index = useGame((s) => s.index);
+  const qids = useGame((s) => s.qids);
+  return useMemo(() => activeQuestions({ index, qids }), [index, qids]);
+};

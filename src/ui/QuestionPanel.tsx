@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Question, Scenario } from "../scenarios/types";
-import { EXAM_LENGTH, useExamComplete, useGame, useScenario, type Answer, type AnswerValue } from "../state/store";
+import { EXAM_LENGTH, useActiveQuestions, useExamComplete, useGame, useScenario, type Answer, type AnswerValue } from "../state/store";
 import { objectName } from "./labels";
 
 /** Tilfeldig rekkefølge på svaralternativene, ny hver gang spørsmålet vises. */
@@ -122,7 +122,8 @@ export function QuestionPanel() {
   const picks = useGame((s) => s.picks);
   const { setDraft, submit, nextQuestion, advance, finishExam } = useGame.getState();
 
-  const q = scenario.questions[qIndex] as Question | undefined;
+  const questions = useActiveQuestions();
+  const q = questions[qIndex] as Question | undefined;
   const options = useMemo(() => (q ? optionsFor(q) : []), [q]);
   const given = q ? answers[q.id] : undefined;
   const actions = useRef<HTMLDivElement>(null);
@@ -130,7 +131,7 @@ export function QuestionPanel() {
   useEffect(() => {
     if (given) actions.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [given]);
-  const isLast = qIndex === scenario.questions.length - 1;
+  const isLast = qIndex === questions.length - 1;
 
   // Klar til å sende: et valgt alternativ, eller hele rekkefølgen.
   const ready = q?.type === "order" ? picks.length === q.correct.length : draft !== null;
@@ -163,7 +164,7 @@ export function QuestionPanel() {
 
   if (driving || !q) return null;
 
-  const correctCount = scenario.questions.filter((x) => answers[x.id]?.correct).length;
+  const correctCount = questions.filter((x) => answers[x.id]?.correct).length;
 
   return (
     <section className="panel question" aria-label="Spørsmål" key={q.id}>
@@ -171,10 +172,10 @@ export function QuestionPanel() {
         <span>
           {isExam
             ? `Prøve · spørsmål ${Math.min(EXAM_LENGTH, exam.log.length + (given ? 0 : 1))} / ${EXAM_LENGTH}`
-            : `Spørsmål ${qIndex + 1} / ${scenario.questions.length}`}
+            : `Spørsmål ${qIndex + 1} / ${questions.length}`}
         </span>
         <span className="question-dots" aria-hidden>
-          {scenario.questions.map((x, i) => (
+          {questions.map((x, i) => (
             <i
               key={x.id}
               className={
@@ -247,7 +248,7 @@ export function QuestionPanel() {
             <div className="question-done">
               {!isExam && (
                 <span>
-                  {correctCount} av {scenario.questions.length} riktige
+                  {correctCount} av {questions.length} riktige
                 </span>
               )}
               <span>Trykk «Videre» (eller Enter) for å kjøre videre.</span>

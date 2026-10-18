@@ -32,19 +32,24 @@ export function Grid() {
   );
 }
 
-/** Hovedveien uten midtlinje (midtlinjen tilhører hvert scenario, se CenterLine). */
-export function MainRoad() {
+/** Hovedveien uten midtlinje (midtlinjen tilhører hvert scenario, se CenterLine). `end` = der vegen slutter. */
+export function MainRoad({ end = E }: { end?: number }) {
   const w = HW + SHOULDER;
+  const len = end + E;
   return (
     <g>
-      <rect x={-w} y={-E} width={w * 2} height={E * 2} className="road" />
-      <line x1={-w} y1={-E} x2={-w} y2={E} className="road-edge" />
-      <line x1={w} y1={-E} x2={w} y2={E} className="road-edge" />
-      <rect x={-HW + 0.1} y={-E} width={LINE} height={E * 2} className="paint" />
-      <rect x={HW - 0.1 - LINE} y={-E} width={LINE} height={E * 2} className="paint" />
+      <rect x={-w} y={-E} width={w * 2} height={len} className="road" />
+      <line x1={-w} y1={-E} x2={-w} y2={end} className="road-edge" />
+      <line x1={w} y1={-E} x2={w} y2={end} className="road-edge" />
+      <rect x={-HW + 0.1} y={-E} width={LINE} height={len} className="paint" />
+      <rect x={HW - 0.1 - LINE} y={-E} width={LINE} height={len} className="paint" />
     </g>
   );
 }
+
+/** Der hovedvegen slutter (T-kryss der du må svinge), ellers undefined. */
+export const mainRoadEnd = (road: RoadLayout): number | undefined =>
+  road.type === "t-ende" ? road.at + HW + SHOULDER : undefined;
 
 const DASH: Record<CenterLineType, [number, number] | null> = {
   midtlinje: [...CENTER_DASH],
@@ -65,6 +70,8 @@ function centerGaps(road: RoadLayout): [number, number][] {
     case "t-kryss":
     case "x-kryss":
       return [[road.at - HW - 0.5, road.at + HW + 0.5]];
+    case "t-ende":
+      return [[road.at - HW - 0.5, E]];
     case "rundkjoring":
       return [[road.at - RB_OUTER - RB_SPLITTER, road.at + RB_OUTER + RB_SPLITTER]];
   }
@@ -183,6 +190,30 @@ function SideRoad({
         x1={side * centerFrom}
         y1={at}
         x2={edgeTo}
+        y2={at}
+        className="center-line"
+        strokeWidth={LINE}
+        strokeDasharray={CENTER_DASH.join(" ")}
+      />
+    </g>
+  );
+}
+
+/** Gjennomgående veg på tvers der hovedvegen slutter. */
+function TEnde({ at }: { at: number }) {
+  const w = HW + SHOULDER;
+  return (
+    <g>
+      <SideRoad at={at} side={1} />
+      <SideRoad at={at} side={-1} />
+      {/* Midtpartiet: fjern kant av hovedvegen og fullfør tverrvegens ytterkant og midtlinje */}
+      <rect x={-w - 0.05} y={at - w} width={w * 2 + 0.1} height={w * 2} className="road" />
+      <line x1={-w} y1={at + w} x2={w} y2={at + w} className="road-edge" />
+      <rect x={-w} y={at + HW - 0.1 - LINE} width={w * 2} height={LINE} className="paint" />
+      <line
+        x1={-w}
+        y1={at}
+        x2={w}
         y2={at}
         className="center-line"
         strokeWidth={LINE}
@@ -355,6 +386,7 @@ export function RoadFeatures({ road, extras = [] }: { road: RoadLayout; extras?:
         </>
       )}
       {road.type === "rundkjoring" && <Roundabout at={road.at} />}
+      {road.type === "t-ende" && <TEnde at={road.at} />}
       {/* Etter kryssene, så gang- og sykkelvegen ligger over sidevegene der den krysser dem */}
       {extras.map((x, i) =>
         x.type === "busslomme" ? (

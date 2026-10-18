@@ -198,8 +198,10 @@ export const moreSigns: SignDef[] = [
   warning("104.2", "Bratt bakke (fall)", pictograms.brattBakke, "Varsler bratt bakke nedover. Hold god avstand og bruk motoren til å bremse."),
   warning("106.1", "Smalere veg", pictograms.smalereVeg, "Varsler at vegen blir smalere på begge sider."),
   warning("108", "Ujevn veg", pictograms.ujevnVeg, "Varsler ujevn vegbane. Senk farten."),
+  warning("109", "Fartshump", pictograms.ujevnVeg, "Varsler fartshump. Senk farten før humpen."),
   warning("110", "Vegarbeid", pictograms.vegarbeid, "Varsler arbeid på eller ved vegen. Senk farten og følg skilting og anvisninger."),
   warning("116", "Glatt kjørebane", pictograms.glatt, "Varsler at kjørebanen kan være spesielt glatt."),
+  warning("122", "Tunnel", pictograms.utropstegn, "Varsler tunnel foran."),
   warning("124", "Farlig vegkryss", pictograms.kryssHoyre, "Varsler et farlig kryss der den vanlige høyreregelen gjelder."),
   warning("126", "Rundkjøring", pictograms.rundkjoring, "Varsler rundkjøring foran."),
   warning("132", "Trafikklyssignal", pictograms.trafikklys, "Varsler trafikklys foran.", false, true),
@@ -334,6 +336,22 @@ export const moreSigns: SignDef[] = [
     draw: (ctx, value = 60) => endOf(ctx, (c) => text(c, String(value), 0, -0.01, 220)),
   },
   {
+    code: "366",
+    name: "Fartsgrensesone",
+    category: "forbudsskilt",
+    shape: "square",
+    explanation:
+      "Fartsgrensen gjelder i hele sonen, også i sidegatene, fram til skilt for slutt på sonen.",
+    rule: "Skiltforskriften § 8 (skilt 366)",
+    draw: (ctx, value = 30) => {
+      fillShape(ctx, "square", 1, C.white);
+      fillShape(ctx, "circle", 0.62, C.red);
+      fillShape(ctx, "circle", 0.5, C.white);
+      text(ctx, String(value), 0, 0.06, 130);
+      text(ctx, "SONE", 0, -0.36, 90);
+    },
+  },
+  {
     code: "370",
     name: "Stans forbudt",
     category: "forbudsskilt",
@@ -413,6 +431,13 @@ export const moreSigns: SignDef[] = [
     },
     "Motorveg begynner. Bare motorvogner som lovlig kan kjøre minst 40 km/t på flat veg, er tillatt. Det er forbudt å rygge, vende og stanse.",
     "Skiltforskriften § 12 (skilt 502), trafikkreglene § 4 nr. 2, § 11 nr. 2 og § 17 nr. 1 e",
+  ),
+  info(
+    "503",
+    "Motortrafikkveg",
+    (ctx) => carFromBehind(ctx, 0, C.white),
+    "Motortrafikkveg begynner. Som på motorveg er bare motorvogner som lovlig kan kjøre minst 40 km/t, tillatt.",
+    "Skiltforskriften § 12 (skilt 503), trafikkreglene § 4 nr. 2",
   ),
   info(
     "518",

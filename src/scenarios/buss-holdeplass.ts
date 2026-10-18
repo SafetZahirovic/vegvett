@@ -68,5 +68,14 @@ export const bussHoldeplass: Scenario = {
       rule: "Trafikkreglene § 7 nr. 5",
       highlight: ["fart"],
     },
+    {
+      id: "buss-fare",
+      type: "yesno",
+      prompt: "Kan bussen kjøre ut uten å ta hensyn til deg, siden du har vikeplikt?",
+      correct: false,
+      explanation: "Du har vikeplikt, men bussføreren skal likevel unngå fare når bussen kjører ut.",
+      rule: "Trafikkreglene § 7 nr. 5",
+      highlight: ["buss"],
+    },
   ],
 };

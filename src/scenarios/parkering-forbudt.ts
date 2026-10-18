@@ -49,5 +49,21 @@ export const parkeringForbudt: Scenario = {
       rule: "Trafikkreglene § 1 nr. 1 k, skiltforskriften § 8 (skilt 372)",
       highlight: ["parkering", "venter"],
     },
+    {
+      id: "pf-definisjon",
+      type: "choice",
+      prompt: "Hva regnes ikke som parkering?",
+      options: [
+        { id: "kort", text: "Kort stans for av- og påstigning eller av- og pålessing" },
+        { id: "vente", text: "Å vente i bilen på en venn" },
+        { id: "handle", text: "Å la bilen stå i ti minutter mens du handler" },
+        { id: "motor", text: "All stans der motoren går" },
+      ],
+      correct: "kort",
+      explanation:
+        "Parkering er all hensetting av kjøretøy, også når føreren blir sittende. Unntaket er kort stans for av- og påstigning eller av- og pålessing.",
+      rule: "Trafikkreglene § 1 nr. 1 k",
+      highlight: ["parkering"],
+    },
   ],
 };

@@ -58,5 +58,20 @@ export const xKryssStopp: Scenario = {
       rule: "Skiltforskriften § 6 (skilt 204)",
       highlight: ["stopp", "kryssende"],
     },
+    {
+      id: "stopp-uten-linje",
+      type: "choice",
+      prompt: "Hvor skal du stanse ved et stoppskilt hvis det ikke er stopplinje?",
+      options: [
+        { id: "oversikt", text: "Der du har god oversikt over den kryssende vegen" },
+        { id: "skilt", text: "Rett ved skiltet, uansett oversikt" },
+        { id: "ingen", text: "Du trenger ikke stanse uten stopplinje" },
+        { id: "midt", text: "Midt i krysset" },
+      ],
+      correct: "oversikt",
+      explanation: "Mangler stopplinje, skal du stanse der du har god oversikt over trafikken på vegen du skal inn på.",
+      rule: "Skiltforskriften § 6 (skilt 204)",
+      highlight: ["stopp"],
+    },
   ],
 };

@@ -20,6 +20,8 @@ export type RoadLayout =
   | { type: "t-kryss"; at: number; branch: "left" | "right" }
   /** Kryssende vei ved v = at. */
   | { type: "x-kryss"; at: number }
+  /** Vegen du kjører på, ender i en gjennomgående veg ved v = at (du må svinge). */
+  | { type: "t-ende"; at: number }
   /** Rundkjøring med sentrum i [0, at] og armer i alle fire retninger. */
   | { type: "rundkjoring"; at: number };
 

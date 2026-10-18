@@ -81,5 +81,15 @@ export const rundkjoringVenstre: Scenario = {
       rule: "Skiltforskriften § 6 (skilt 202) og § 22 (vikelinje 1022)",
       highlight: ["kommer", "vikelinje"],
     },
+    {
+      id: "rkv-blink-inn",
+      type: "yesno",
+      prompt: "Er du pålagt å blinke til venstre når du kjører inn for å ta tredje avkjøring?",
+      correct: false,
+      explanation:
+        "Det er ikke påbudt å blinke til venstre inn i rundkjøringen, men Statens vegvesen beskriver det som nyttig. Du skal blinke til høyre før du kjører ut.",
+      rule: "Trafikkreglene § 14 nr. 2 (veiledning fra Statens vegvesen)",
+      highlight: [],
+    },
   ],
 };

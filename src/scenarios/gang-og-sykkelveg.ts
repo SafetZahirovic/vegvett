@@ -59,5 +59,14 @@ export const gangOgSykkelveg: Scenario = {
       rule: "Trafikkreglene § 4 nr. 1, skiltforskriften § 12 (skilt 522)",
       highlight: ["gs-skilt"],
     },
+    {
+      id: "gs-stanse",
+      type: "yesno",
+      prompt: "Kan du stanse eller parkere på gang- og sykkelvegen et øyeblikk?",
+      correct: false,
+      explanation: "Det er forbudt å stanse på fortau, gangveg og sykkelveg – også et kort øyeblikk.",
+      rule: "Trafikkreglene § 17 nr. 1 c",
+      highlight: ["gs-skilt"],
+    },
   ],
 };

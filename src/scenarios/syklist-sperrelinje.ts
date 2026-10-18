@@ -65,5 +65,14 @@ export const syklistSperrelinje: Scenario = {
       rule: "Trafikkreglene § 12 (Statens vegvesens tolkning)",
       highlight: ["syklist"],
     },
+    {
+      id: "ss-svinge",
+      type: "yesno",
+      prompt: "Kan du krysse sperrelinjen for å svinge inn til en eiendom på venstre side?",
+      correct: false,
+      explanation: "Du skal ikke kjøre på eller over sperrelinjen. Kjør videre til et sted der du lovlig kan snu eller svinge.",
+      rule: "Skiltforskriften § 22 (sperrelinje 1004)",
+      highlight: [CENTER_LINE_ID],
+    },
   ],
 };

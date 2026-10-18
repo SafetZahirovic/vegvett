@@ -67,5 +67,24 @@ export const gangfelt: Scenario = {
       rule: "Skiltforskriften § 12 (skilt 516)",
       highlight: ["gangfelt-skilt", "gangfelt"],
     },
+    {
+      id: "gf-stanse",
+      type: "yesno",
+      prompt: "Det er kø forbi gangfeltet. Kan du stanse slik at bilen blir stående i gangfeltet?",
+      correct: false,
+      explanation: "Du skal unngå å stanse i gangfeltet, så gående kommer trygt over. Vent før gangfeltet til det er plass.",
+      rule: "Trafikkreglene § 9 nr. 4",
+      highlight: ["gangfelt"],
+    },
+    {
+      id: "gf-forbi",
+      type: "yesno",
+      prompt: "Bilen foran deg stanser foran gangfeltet. Kan du kjøre forbi den?",
+      correct: false,
+      explanation:
+        "Bilen kan skjule gående som er på vei over. Du skal ikke kjøre forbi når sikten mot gangfeltet er hindret.",
+      rule: "Trafikkreglene § 12 nr. 6",
+      highlight: ["gangfelt"],
+    },
   ],
 };

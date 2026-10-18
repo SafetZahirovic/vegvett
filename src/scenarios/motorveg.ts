@@ -70,5 +70,20 @@ export const motorveg: Scenario = {
       rule: "Trafikkreglene § 4 nr. 2",
       highlight: ["motorveg-skilt"],
     },
+    {
+      id: "mv-kjoretoy",
+      type: "choice",
+      prompt: "Hvilke kjøretøy kan kjøre på motorveg?",
+      options: [
+        { id: "40", text: "Motorvogner som lovlig kan kjøre minst 40 km/t på flat veg" },
+        { id: "alle", text: "Alle kjøretøy, også sykler" },
+        { id: "bil", text: "Bare personbiler" },
+        { id: "moped", text: "Alle motorvogner, også moped" },
+      ],
+      correct: "40",
+      explanation: "Bare motorvogner som kan og lovlig kan kjøre minst 40 km/t på flat veg, er tillatt på motorveg.",
+      rule: "Trafikkreglene § 4 nr. 2",
+      highlight: ["motorveg-skilt"],
+    },
   ],
 };

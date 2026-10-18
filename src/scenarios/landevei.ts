@@ -66,5 +66,21 @@ export const landevei: Scenario = {
       rule: "Vegtrafikkloven § 6 første ledd",
       highlight: ["fart", "motende"],
     },
+    {
+      id: "lv-syklist",
+      type: "choice",
+      prompt: "Hvordan kjører du forbi syklisten foran deg?",
+      options: [
+        { id: "avstand", text: "Med god sideavstand, og bare når det er fri sikt og ingen møtende" },
+        { id: "tett", text: "Tett inntil, så du ikke kommer over i motsatt felt" },
+        { id: "tut", text: "Tuter og kjører forbi med en gang" },
+        { id: "fort", text: "Så fort som mulig, så det går raskt" },
+      ],
+      correct: "avstand",
+      explanation:
+        "Forbikjøring krever fri sikt og god avstand. Statens vegvesen anbefaler minst 1,5 meter sideavstand til syklister.",
+      rule: "Trafikkreglene § 12, vegtrafikkloven § 3",
+      highlight: ["syklist", "motende"],
+    },
   ],
 };

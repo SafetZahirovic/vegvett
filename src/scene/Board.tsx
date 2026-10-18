@@ -15,7 +15,7 @@ import { CENTER_LINE_ID, PLAYER_ID, type Route } from "../scenarios/types";
 import { isSceneQuestion, useCurrentQuestion } from "../state/store";
 import { AnimalFigure, CarFigure, DecorFigure, PedestrianFigure, SignFigure, animalTopHeight, vehicleTopHeight } from "./Figures";
 import { RouteArrow } from "./RouteArrow";
-import { CenterLine, Grid, MainRoad, Markings, RoadFeatures } from "./Ground";
+import { CenterLine, Grid, MainRoad, Markings, RoadFeatures, mainRoadEnd } from "./Ground";
 import { DIR, GROUND_MATRIX, P, depth } from "./iso";
 import { compass, frameFor, playerWorld, travelAt, type Frame } from "./pose";
 import { PLAYER_U } from "./road";
@@ -491,7 +491,7 @@ export function Board() {
                   <rect x={-400} y={-400} width={800} height={800} fill={`url(#back-grad-${i})`} />
                 </mask>
               </defs>
-              <MainRoad />
+              <MainRoad end={mainRoadEnd(sc.road)} />
               <RoadFeatures road={sc.road} extras={sc.roadExtras} />
               <CenterLine scenario={sc} highlighted={i === 0 && highlight.includes(CENTER_LINE_ID)} />
               <Markings markings={sc.markings} highlight={i === 0 ? highlight : []} />

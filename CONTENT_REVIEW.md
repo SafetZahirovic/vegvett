@@ -209,6 +209,73 @@ Numre og navn er kontrollert mot skiltforskriften av en AI-agent. Bildene er de 
 - ☐ Spilleren kjører sin rute mellom scenarioene: venstre- og høyresving, og mot klokka rundt rundkjøringen. Neste scenario fortsetter i den nye retningen.
 
 
+## Spørsmålspott og runde 3 med innhold
+
+Hvert scenario kan ha flere spørsmål enn de tre som vises; hvert besøk trekker inntil tre tilfeldig.
+
+### Nye skilt
+| Status | Kode | Navn | Påstand | Henvisning |
+|---|---|---|---|---|
+| ☐ | 109 | Fartshump | Varsler fartshump. | SF § 4 |
+| ☐ | 122 | Tunnel | Varsler tunnel. | SF § 4 |
+| ☐ | 366 | Fartsgrensesone | Grensen gjelder i hele sonen, også sidegater, til 368 (eller 540/548). | SF § 8 |
+| ☐ | 503 | Motortrafikkveg | Bare motorvogner som lovlig kan kjøre minst 40 km/t. ⚠ At TR § 4 nr. 2 også gjelder motortrafikkveg, er ikke eksplisitt verifisert. | SF § 12, TR § 4 nr. 2 |
+
+### Ny vegtype
+- ☐ **T-kryss der vegen ender** (`t-ende`): spilleren må svinge. Høyreregelen gjelder også her hvis krysset er uregulert.
+
+### Nye spørsmål i eksisterende scenarioer
+| Status | Scenario / spørsmål | Riktig svar | Henvisning |
+|---|---|---|---|
+| ☐ | gangfelt / gf-stanse | Nei – unngå å stanse i gangfelt | TR § 9 nr. 4 |
+| ☐ | gangfelt / gf-forbi | Nei – ikke forbikjøring når sikten mot gangfeltet er hindret | TR § 12 nr. 6 |
+| ☐ | gang-og-sykkelveg / gs-stanse | Nei – stans forbudt på sykkelveg | TR § 17 nr. 1 c |
+| ☐ | syklist-sperrelinje / ss-svinge | Nei – ikke over sperrelinje for å svinge | SF § 22 (1004) |
+| ☐ | trafikklys / tl-rodgult | Grønt kommer straks, vent | SF § 24 A |
+| ☐ | trafikklys / tl-blink | Vær særlig forsiktig | SF § 24 B (1098) |
+| ☐ | motorveg / mv-kjoretoy | Motorvogn som lovlig kan kjøre minst 40 km/t | TR § 4 nr. 2 |
+| ☐ | parkering-forbudt / pf-definisjon | Kort av-/påstigning eller lasting er ikke parkering | TR § 1 nr. 1 k |
+| ☐ | hoyreregelen / hr-syklist | Ja – syklist på kjørebanen omfattes; fra sykkelveg har syklisten vikeplikt | TR § 7 nr. 2 og 4 |
+| ☐ | rundkjoring-venstre / rkv-blink-inn | Nei – ikke påbudt å blinke til venstre inn | TR § 14 nr. 2 (Vegvesen-veiledning) |
+| ☐ | buss-holdeplass / buss-fare | Nei – bussføreren skal unngå fare | TR § 7 nr. 5 |
+| ☐ | utrykning / utr-gront | Ja – fri veg også på grønt lys | TR § 10 nr. 1 |
+| ☐ | x-kryss-stopp / stopp-uten-linje | Der du har god oversikt | SF § 6 (204) ⚠ formulering ikke ordrett verifisert |
+| ☐ | landevei / lv-syklist | God sideavstand, fri sikt, ingen møtende | TR § 12, VTL § 3 |
+| ☐ | elg / elg-ulykke | Ja – stanse og hjelpe, også dyr | VTL § 12 |
+
+### Nye scenarioer
+| Status | Scenario / spørsmål | Riktig svar | Henvisning |
+|---|---|---|---|
+| ☐ | utkjorsel-parkering / up-vikeplikt | Du har vikeplikt for all trafikk | TR § 7 nr. 4 |
+| ☐ | utkjorsel-parkering / up-hoyreregel | Nei – høyreregelen gjelder ikke | TR § 7 nr. 4 |
+| ☐ | utkjorsel-parkering / up-hvem-forst (klikk) | Bilen fra venstre (i feltet du svinger inn i) | TR § 7 nr. 4 |
+| ☐ | t-ende-hoyreregel / te-forst (klikk) | Bilen fra høyre | TR § 7 nr. 2 |
+| ☐ | t-ende-hoyreregel / te-rekkefolge | Høyre → du → venstre | TR § 7 nr. 2 |
+| ☐ | t-ende-hoyreregel / te-gjennomgaende | Nei – høyreregelen gjelder i T-kryss | TR § 7 nr. 2 |
+| ☐ | t-ende-vikeplikt / tv-venstre | Ja – 202 gir vikeplikt for begge retninger | SF § 6 |
+| ☐ | t-ende-vikeplikt / tv-hvor | Ved vikelinjen | SF § 22 (1022) |
+| ☐ | t-ende-vikeplikt / tv-skilt | Vikeplikt | SF § 6 |
+| ☐ | fartshump / fh-skilt | Fartshump | SF § 4 |
+| ☐ | fartshump / fh-handling | Senk farten i god tid | VTL § 6, SF § 8 |
+| ☐ | fartsgrensesone / fs-skilt | Fartsgrensesone | SF § 8 |
+| ☐ | fartsgrensesone / fs-sidegate | Ja | SF § 8 (366/368) |
+| ☐ | fartsgrensesone / fs-slutt | Ved skilt for slutt på sonen | SF § 8 (368) |
+| ☐ | tunnel / tu-skilt | Tunnel | SF § 4 |
+| ☐ | tunnel / tu-lys | Ja – lys skal være tent under kjøring | TR § 15 ⚠ nummer/ordlyd ikke verifisert |
+| ☐ | blindveg / bv-skilt | Blindveg | SF § 12 |
+| ☐ | blindveg / bv-gjennom | Nei | SF § 12 |
+| ☐ | syklist-hoyreregel / sh-forst (klikk) | Syklisten | TR § 7 nr. 2 |
+| ☐ | syklist-hoyreregel / sh-gs-veg | Ja – fra gang- og sykkelveg har syklisten vikeplikt | TR § 7 nr. 4 |
+| ☐ | motortrafikkveg / mt-skilt | Motortrafikkveg | SF § 12 |
+| ☐ | motortrafikkveg / mt-moped | Nei | TR § 4 nr. 2 ⚠ |
+| ☐ | varsel-rundkjoring / vr-skilt | Rundkjøring (fareskilt 126) | SF § 4 |
+| ☐ | varsel-rundkjoring / vr-handling | Senk farten, klar til å vike | SF § 4, § 6 |
+| ☐ | fjellveg / fv-bakke | Bratt bakke nedover | SF § 4 |
+| ☐ | fjellveg / fv-svinger | Farlige svinger, første til høyre | SF § 4 |
+| ☐ | fjellveg / fv-smalere | Smalere veg | SF § 4 |
+| ☐ | fjellveg / fv-nedover | Lav fart, gjerne motorbrems | VTL § 6 første ledd (kjøreråd) |
+
+
 ## Ikke dekket ennå
 - Feltvalg i tofelts rundkjøring (krever at to felt i ringen kan tegnes).
 - Trikk som kjøretøytype.

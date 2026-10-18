@@ -24,7 +24,7 @@ export type RoadLayout =
   | { type: "rundkjoring"; at: number };
 
 /** Midtlinje på hovedvegen. Standard er vanlig stiplet midtlinje. */
-export type CenterLineType = "midtlinje" | "varsellinje" | "sperrelinje";
+export type CenterLineType = "midtlinje" | "varsellinje" | "sperrelinje" | "midtdeler";
 
 export type CenterLineSegment = {
   type: CenterLineType;
@@ -33,7 +33,15 @@ export type CenterLineSegment = {
   to?: number;
 };
 
-export type RoadExtra = { type: "busslomme"; from: number; to: number };
+export type RoadExtra =
+  | { type: "busslomme"; from: number; to: number }
+  /**
+   * Gang- og sykkelveg langs hovedvegen, skilt fra kjørebanen med en grøftekant.
+   * `side` sett i spillerens kjøreretning. Krysser eventuelle sideveger.
+   */
+  | { type: "sykkelveg"; side: "left" | "right"; from?: number; to?: number }
+  /** Smalt vegparti (f.eks. smal bru eller vegarbeid) der bare ett kjøretøy får plass i bredden. */
+  | { type: "smalt"; from: number; to: number };
 
 export type SignPlacement = {
   id: string;
@@ -84,13 +92,24 @@ export type Pedestrian = {
   id: string;
   name?: string;
   pos: Vec2;
-  heading: Dir;
+  heading: Heading;
   color?: string;
   route?: Route;
 };
 
 /** Id som fremhever hovedvegens midtlinje. */
 export const CENTER_LINE_ID = "midtlinje";
+
+export type AnimalType = "elg" | "rein" | "hjort" | "ku" | "sau";
+
+export type Animal = {
+  id: string;
+  type: AnimalType;
+  name?: string;
+  pos: Vec2;
+  heading: Heading;
+  route?: Route;
+};
 
 /** Id for spillerens bil i klikk-/rekkefølgespørsmål og fremheving. */
 export const PLAYER_ID = "player";
@@ -106,7 +125,9 @@ export type Topic =
   | "oppmerking"
   | "utrykning"
   | "buss"
-  | "fart";
+  | "fart"
+  | "dyr"
+  | "sykkel";
 
 type QuestionBase = {
   id: string;
@@ -149,6 +170,7 @@ export type Scenario = {
   markings: Marking[];
   vehicles: Vehicle[];
   pedestrians?: Pedestrian[];
+  animals?: Animal[];
   decor?: Decor[];
   player: { indicator?: "left" | "right"; route?: Route };
   /** Hvilket punkt på bakken kartet sentreres på (standard [0, 17], litt foran bilen). */

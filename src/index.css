@@ -568,3 +568,12 @@ button.hud-brand:hover { border-color: var(--bp-accent); }
   .topic-n { display: none; }
   .titleblock > div:last-child { display: none; }
 }
+
+/* ---------- Gang- og sykkelveg og dyr ---------- */
+
+.cycle-path { fill: #1a4a63; }
+.bike-symbol circle, .bike-symbol polyline { fill: none; stroke: var(--bp-line); stroke-width: 0.12; opacity: 0.7; }
+.animal .car-side, .animal .car-top { stroke-width: 1.1; }
+.animal .antler { fill: none; stroke: var(--car); stroke-width: 1.4; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+.verge { fill: var(--bp-bg); }
+.guardrail { stroke: var(--bp-line); stroke-width: 1.5; vector-effect: non-scaling-stroke; }

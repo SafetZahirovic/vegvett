@@ -100,6 +100,103 @@ Alle scenarioer har høyretrafikk: spilleren kjører i høyre felt, og møtende 
 - ☐ **buss-holdeplass:** busslomma er tegnet med stiplet kantlinje forbi lomma. ⚠ Utformingen er forenklet.
 - ☐ **utrykning:** du blinker til høyre og kjører inn til siden, og den møtende bilen gjør det samme.
 
+## Nye skilt (`src/signs/more.ts`)
+
+Numre og navn er kontrollert mot skiltforskriften av en AI-agent. Utseendet er forenklet.
+
+| Status | Kode | Navn | Kategori | Påstand / forklaring | Henvisning |
+|---|---|---|---|---|---|
+| ☐ | 100.2 | Farlig sving (til venstre) | Fareskilt | Farlig sving til venstre. | SF § 4 |
+| ☐ | 102.1 | Farlige svinger | Fareskilt | Flere farlige svinger, den første til høyre. | SF § 4 |
+| ☐ | 104.2 | Bratt bakke (fall) | Fareskilt | Bratt bakke nedover. ⚠ At 104.2 = fall er middels sikkert. | SF § 4 |
+| ☐ | 106.1 | Smalere veg | Fareskilt | Vegen smalner på begge sider. | SF § 4 |
+| ☐ | 108 | Ujevn veg | Fareskilt | Ujevn vegbane. | SF § 4 |
+| ☐ | 110 | Vegarbeid | Fareskilt | Arbeid på eller ved vegen. | SF § 4 |
+| ☐ | 116 | Glatt kjørebane | Fareskilt | Kjørebanen kan være spesielt glatt. | SF § 4 |
+| ☐ | 124 | Farlig vegkryss | Fareskilt | Farlig kryss der vanlig høyreregel gjelder. | SF § 4 |
+| ☐ | 126 | Rundkjøring | Fareskilt | Varsler rundkjøring. | SF § 4 |
+| ☐ | 132 | Trafikklyssignal | Fareskilt | Varsler trafikklys. | SF § 4 |
+| ☐ | 140 | Avstand til gangfelt | Fareskilt | Varsler gangfelt foran. | SF § 4 |
+| ☐ | 142 | Barn | Fareskilt | Sted der barn ofte ferdes. | SF § 4 |
+| ☐ | 144 | Syklende | Fareskilt | Syklende krysser eller kjører ofte ut i vegen. | SF § 4 |
+| ☐ | 146.1–146.5 | Elg, Rein, Hjort, Ku, Sau | Fareskilt | Dyr ferdes ofte over eller langs vegen. ⚠ «Særlig i skumring og mørke» er et råd, ikke lovtekst. | SF § 4 |
+| ☐ | 148 | Møtende trafikk | Fareskilt | Trafikk i begge retninger. ⚠ Pilenes plassering er middels sikker. | SF § 4 |
+| ☐ | 149 | Kø | Fareskilt | Varsler kø. | SF § 4 |
+| ☐ | 156 | Annen fare | Fareskilt | Fare uten eget skilt. | SF § 4 |
+| ☐ | 210 | Forkjørskryss | Vikeplikt- og forkjørsskilt | Trafikk fra sidevegene har vikeplikt. | SF § 6 |
+| ☐ | 212 | Vikeplikt overfor møtende kjørende | Vikeplikt- og forkjørsskilt | Ikke kjør inn på smalt parti hvis du hindrer møtende. ⚠ Pilfarger er middels sikre. | SF § 6 |
+| ☐ | 214 | Møtende kjørende har vikeplikt | Vikeplikt- og forkjørsskilt | Møtende har vikeplikt for deg. ⚠ Pilfarger er middels sikre. | SF § 6 |
+| ☐ | 306.1 | Forbudt for motorvogn | Forbudsskilt | Unntatt liten elektrisk motorvogn. | SF § 8 |
+| ☐ | 306.6 | Forbudt for syklende | Forbudsskilt | Også liten elektrisk motorvogn. | SF § 8 |
+| ☐ | 330.1 / 330.2 | Svingeforbud (høyre / venstre) | Forbudsskilt | Gjelder i krysset ved skiltet eller første kryss etter. | SF § 8 |
+| ☐ | 332 | Vendingsforbud | Forbudsskilt | Forbud mot å vende. | SF § 8 |
+| ☐ | 336 | Slutt på forbikjøringsforbud | Forbudsskilt | Avslutter 334. | SF § 8 |
+| ☐ | 364 | Slutt på særskilt fartsgrense | Forbudsskilt | Generell grense gjelder (50/80). | SF § 8, VTL § 6 annet ledd |
+| ☐ | 370 | Stans forbudt | Forbudsskilt | Ingen stans, heller ikke kort av- og påstigning. Gjelder til neste kryss eller nytt skilt. | SF § 8 |
+| ☐ | 372 | Parkering forbudt | Forbudsskilt | Kort stans for av- og påstigning eller lasting er tillatt. | SF § 8, TR § 1 nr. 1 k |
+| ☐ | 402.1–402.3 | Påbudt kjøreretning | Påbudsskilt | Høyre / venstre / rett fram. | SF § 10 |
+| ☐ | 404.1 | Påbudt kjørefelt (høyre) | Påbudsskilt | Passer skiltet på høyre side. | SF § 10 |
+| ☐ | 502 | Motorveg | Opplysningsskilt | Bare motorvogner som lovlig kan kjøre minst 40 km/t. Rygging, vending og stans forbudt. | SF § 12, TR § 4 nr. 2, § 11 nr. 2, § 17 nr. 1 e |
+| ☐ | 518 / 520 / 522 | Gangveg / Sykkelveg / Gang- og sykkelveg | Opplysningsskilt | Ikke lov å kjøre motorvogn. Syklende ut fra sykkelveg har vikeplikt. ⚠ Kvadratisk form er middels sikker. | SF § 12, TR § 4 nr. 1, § 7 nr. 4 |
+| ☐ | 527.1 | Blindveg | Opplysningsskilt | Ingen gjennomkjøring. ⚠ Utseendet er middels sikkert. | SF § 12 |
+| ☐ | 552 | Parkering | Opplysningsskilt | Parkeringsplass. | SF § 12 |
+
+## Nye veg- og objekttyper
+- ☐ **Gang- og sykkelveg** langs vegen, adskilt med grøftekant, med sykkelsymbol. Den krysser sideveger uten oppmerking.
+- ☐ **Smalt vegparti** (bru/vegarbeid), der bare ett kjøretøy får plass.
+- ☐ **Midtdeler** på motorveg. ⚠ Forenklet: motorvegen er tegnet med ett felt i hver retning.
+- ☐ **Dyr:** elg, rein, hjort, ku og sau.
+
+## Nye scenarioer og spørsmål
+
+| Status | Scenario / spørsmål | Riktig svar | Forklaring (kort) | Henvisning |
+|---|---|---|---|---|
+| ☐ | elg / elg-skilt | Elg | 146.1. | SF § 4 |
+| ☐ | elg / elg-handling | Senk farten, vær klar til å stanse | Dyr er uforutsigbare. | VTL § 3 |
+| ☐ | rein / rein-handling | Senk farten, stans om nødvendig, vent | Aktpågivenhet. | VTL § 3 |
+| ☐ | rein / rein-ulykke | Ja | Plikt til å stanse og hjelpe, også dyr. | VTL § 12 |
+| ☐ | sau / sau-skilt | Sau | 146.5. | SF § 4 |
+| ☐ | sau / sau-uforutsigbar | Ja | Dyr kan gå ut uten forvarsel. | VTL § 3 |
+| ☐ | gang-og-sykkelveg / gs-vikeplikt | Syklisten | Den som krysser veg fra sykkelveg / gang- og sykkelveg, har vikeplikt. | TR § 7 nr. 4, VTL § 3 |
+| ☐ | gang-og-sykkelveg / gs-kjore | Nei | Ikke lov å kjøre motorvogn på gang- og sykkelveg. | TR § 4 nr. 1 |
+| ☐ | parkering-forbudt / pf-skilt | Parkering forbudt | 372: én skråstrek. 370: kryss. | SF § 8 |
+| ☐ | parkering-forbudt / pf-slippe-av | Ja | Kort av- og påstigning er ikke parkering. | TR § 1 nr. 1 k |
+| ☐ | stans-forbudt / sf-skilt | Stans forbudt | 370. | SF § 8 |
+| ☐ | stans-forbudt / sf-slippe-av | Nei | Ingen stans i det hele tatt. | SF § 8 |
+| ☐ | svingeforbud / sv-skilt | Svingeforbud til venstre | 330.2. | SF § 8 |
+| ☐ | svingeforbud / sv-hvor | Rett fram eller til høyre | Bare venstresving forbudt. | SF § 8 |
+| ☐ | pabudt-kjoreretning / pk-skilt | Du må kjøre til høyre | 402.1. | SF § 10 |
+| ☐ | pabudt-kjoreretning / pk-rett | Nei | Påbudet gjelder. | SF § 10 |
+| ☐ | vendingsforbud / vf-skilt | Vendingsforbud | 332. | SF § 8 |
+| ☐ | vendingsforbud / vf-snu | Nei | Forbudt å vende. | SF § 8 |
+| ☐ | forkjorskryss / fk-skilt | Forkjørskryss | 210. | SF § 6 |
+| ☐ | forkjorskryss / fk-hvem-forst (klikk) | Du | Begge sideveger har 202 og vikelinje. | SF § 6 |
+| ☐ | farlig-vegkryss / fv-skilt | Farlig vegkryss | 124. | SF § 4 |
+| ☐ | farlig-vegkryss / fv-hvem (klikk) | Bilen fra høyre | Høyreregelen. | TR § 7 nr. 2 |
+| ☐ | moteplikt / mp-skilt | Vikeplikt overfor møtende kjørende | 212 (møtende har 214). | SF § 6 |
+| ☐ | moteplikt / mp-hvem (klikk) | Den møtende bilen | Du venter. | SF § 6 |
+| ☐ | vegarbeid / va-skilt | Vegarbeid | 110. | SF § 4 |
+| ☐ | vegarbeid / va-handling | Senk farten, hold avstand, følg skilt | Aktpågivenhet, skiltet fart. | VTL § 3, SF § 8 |
+| ☐ | barn / barn-skilt | Barn | 142. | SF § 4 |
+| ☐ | barn / barn-hva (klikk) | Barnet ved vegkanten | Barn kan springe ut. | VTL § 3 |
+| ☐ | motorveg / mv-skilt | Motorveg | 502. | SF § 12 |
+| ☐ | motorveg / mv-forbudt | Rygge, vende og stanse | Forbudt på motorveg. | TR § 11 nr. 2, § 17 nr. 1 e |
+| ☐ | motorveg / mv-moped | Nei | Bare motorvogn som lovlig kan kjøre minst 40 km/t. | TR § 4 nr. 2 |
+| ☐ | trafikklys / tl-skilt | Trafikklyssignal | 132. | SF § 4 |
+| ☐ | trafikklys / tl-gult | Stans, med mindre du ikke kan stanse trygt | Gult alene varsler rødt. | SF § 24 A (1080) |
+| ☐ | glatt-kjorebane / gl-skilt | Glatt kjørebane | 116. | SF § 4 |
+| ☐ | glatt-kjorebane / gl-handling | Senk farten og øk avstanden | Tilpass farten, kunne stanse på oversiktlig strekning. | VTL § 6 første ledd, TR § 13 nr. 1 |
+| ☐ | slutt-fartsgrense / sf-grense | 80 km/t | Generell grense utenfor tettbygd strøk. | VTL § 6 annet ledd |
+| ☐ | slutt-fartsgrense / sf-tettbygd | 50 km/t | Generell grense i tettbygd strøk. | VTL § 6 annet ledd |
+| ☐ | syklist-sperrelinje / ss-forbi | Nei | Ikke kjør over sperrelinje, heller ikke for å passere syklist. | SF § 22 (1004), TR § 12 |
+| ☐ | syklist-sperrelinje / ss-avstand | Minst 1,5 m | ⚠ Statens vegvesens anbefaling, ikke lovtekst. | TR § 12 |
+
+## Kjøreanimasjon
+- ☐ Spilleren kjører sin rute mellom scenarioene: venstre- og høyresving, og mot klokka rundt rundkjøringen. Neste scenario fortsetter i den nye retningen.
+
+
 ## Ikke dekket ennå
 - Feltvalg i tofelts rundkjøring (krever at to felt i ringen kan tegnes).
 - Trikk som kjøretøytype.
+- Kollektivfelt (508) og sambruksfelt (509), som krever flere felt.
+- Lyskryss med fungerende trafikklys i tegningen.

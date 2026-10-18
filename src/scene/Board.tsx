@@ -13,15 +13,13 @@ import type { Scenario, Vec2 } from "../scenarios/types";
 import { useGame, type SelectionKind } from "../state/store";
 import { CENTER_LINE_ID, PLAYER_ID, type Route } from "../scenarios/types";
 import { isSceneQuestion, useCurrentQuestion } from "../state/store";
-import { CarFigure, DecorFigure, PedestrianFigure, SignFigure, vehicleTopHeight } from "./Figures";
+import { AnimalFigure, CarFigure, DecorFigure, PedestrianFigure, SignFigure, animalTopHeight, vehicleTopHeight } from "./Figures";
 import { RouteArrow } from "./RouteArrow";
 import { CenterLine, Grid, MainRoad, Markings, RoadFeatures } from "./Ground";
-import { GROUND_MATRIX, P, depth } from "./iso";
-import { PLAYER_U, ROAD_EXTENT, SCENARIO_HALF } from "./road";
+import { DIR, GROUND_MATRIX, P, depth } from "./iso";
+import { compass, frameFor, playerWorld, travelAt, type Frame } from "./pose";
+import { PLAYER_U } from "./road";
 
-/** Hvor langt veien ruller under bilen ved «Videre» (delelig med midtlinjens 12 m-periode). */
-export const CONVEYOR_DISTANCE = SCENARIO_HALF * 2;
-const CONVEYOR_MS = 2600;
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 const MIN_ZOOM = 5;
@@ -34,19 +32,21 @@ const FOCUS_MS = 700;
 const PLAYER_COLOR = "#5ad1ff";
 const DEFAULT_COLOR = "#ffd166";
 const PED_COLOR = "#f4a7ff";
+const ANIMAL_COLOR = "#d9a066";
 
-const POI_RADIUS: Record<SelectionKind, number> = { sign: 1.5, vehicle: 3.4, pedestrian: 1.2 };
+const POI_RADIUS: Record<SelectionKind, number> = { sign: 1.5, vehicle: 3.4, pedestrian: 1.2, animal: 2.4 };
 
-/** Kjører transportbåndet: oppdaterer fremdrift hver frame til overgangen er ferdig. */
+/** Kjører overgangen: oppdaterer fremdrift hver frame til bilen har kjørt ferdig. */
 function useConveyor() {
   const next = useGame((s) => s.next);
   useEffect(() => {
     if (next === null) return;
-    const { setProgress, finishTransition } = useGame.getState();
+    const { setProgress, finishTransition, travel } = useGame.getState();
+    const duration = travel?.durationMs ?? 2600;
     const start = performance.now();
     let raf = 0;
     const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / CONVEYOR_MS);
+      const t = Math.min(1, (now - start) / duration);
       setProgress(t);
       if (t < 1) raf = requestAnimationFrame(tick);
       else finishTransition();
@@ -223,24 +223,50 @@ function usePanZoom(
   };
 }
 
-type Layer = { scenario: Scenario; dv: number; active: boolean };
+/** Myk overgang 0→1 mellom a og b. */
+const smooth = (a: number, b: number, t: number) => {
+  const x = Math.min(1, Math.max(0, (t - a) / (b - a)));
+  return x * x * (3 - 2 * x);
+};
+
+type Layer = {
+  scenario: Scenario;
+  frame: Frame;
+  active: boolean;
+  /** Synlighet for veg/oppmerking og for stående figurer under overgangen. */
+  groundOpacity: number;
+  figureOpacity: number;
+  /** Hvor langt bak startplassen (lokal v) tegningen går før den toner ut. */
+  back: number;
+};
+
+/** Så langt bak bilen vegen tegnes i et scenario i ro. */
+const BACK = 40;
+/** Lengden på uttoningen bakerst. */
+const BACK_FADE = 14;
 
 const INACTIVE = { selected: false, hovered: false, highlighted: false, handlers: undefined };
 
 /** Skjermpunkter (meter, før zoom) for de fremhevede objektene. */
-function focusPoints(scenario: Scenario, ids: string[]): Vec2[] {
+function focusPoints(scenario: Scenario, frame: Frame, ids: string[]): Vec2[] {
   const points: Vec2[] = [];
+  const at = (p: Vec2, h = 0) => {
+    const [u, v] = frame.map(p);
+    points.push(P(u, v, h));
+  };
   for (const id of ids) {
-    if (id === CENTER_LINE_ID) points.push(P(0, 15));
-    if (id === PLAYER_ID) points.push(P(PLAYER_U, 0, 0.8));
+    if (id === CENTER_LINE_ID) at([0, 15]);
+    if (id === PLAYER_ID) at([PLAYER_U, 0], 0.8);
     const sign = scenario.signs.find((s) => s.id === id);
-    if (sign) points.push(P(sign.pos[0], sign.pos[1], 2.5));
+    if (sign) at(sign.pos, 2.5);
     const veh = scenario.vehicles.find((v) => v.id === id);
-    if (veh) points.push(P(veh.pos[0], veh.pos[1], 0.8));
+    if (veh) at(veh.pos, 0.8);
     const ped = scenario.pedestrians?.find((p) => p.id === id);
-    if (ped) points.push(P(ped.pos[0], ped.pos[1], 0.9));
+    if (ped) at(ped.pos, 0.9);
+    const animal = scenario.animals?.find((a) => a.id === id);
+    if (animal) at(animal.pos, 1);
     const mark = scenario.markings.find((m) => m.id === id);
-    if (mark) points.push(P((mark.a[0] + mark.b[0]) / 2, (mark.a[1] + mark.b[1]) / 2));
+    if (mark) at([(mark.a[0] + mark.b[0]) / 2, (mark.a[1] + mark.b[1]) / 2]);
   }
   return points;
 }
@@ -250,6 +276,8 @@ export function Board() {
   const index = useGame((s) => s.index);
   const next = useGame((s) => s.next);
   const progress = useGame((s) => s.progress);
+  const pose = useGame((s) => s.pose);
+  const travel = useGame((s) => s.travel);
   const hovered = useGame((s) => s.hovered);
   const selected = useGame((s) => s.selected);
   const highlight = useGame((s) => s.highlight);
@@ -259,6 +287,38 @@ export function Board() {
   const question = useCurrentQuestion();
   const focusToken = useGame((s) => s.focusToken);
   const { select, setHovered, pickInScene } = useGame.getState();
+
+  // Bilen: står på startplassen, eller kjører ruten sin under overgangen. Kameraet følger den.
+  const driving = next !== null && travel !== null;
+  const t = driving ? progress : 0;
+  const drive = driving ? travelAt(travel, easeInOut(t) * travel.total) : null;
+  const carWorld = drive ? drive.pos : playerWorld(pose);
+  const carHeading = drive ? compass(drive.dir) : frameFor(pose, carWorld).heading("N");
+
+  const layers: Layer[] = [
+    {
+      scenario: SCENARIOS[index],
+      frame: frameFor(pose, carWorld),
+      active: !driving,
+      // Gamle figurer forsvinner tidlig; vegen blir liggende til bilen har kjørt av den.
+      groundOpacity: 1 - smooth(0.7, 1, t),
+      figureOpacity: 1 - smooth(0.02, 0.35, t),
+      back: -BACK,
+    },
+  ];
+  if (driving) {
+    layers.push({
+      scenario: SCENARIOS[next],
+      frame: frameFor(travel.nextPose, carWorld),
+      active: false,
+      groundOpacity: smooth(0.25, 0.65, t),
+      figureOpacity: smooth(0.5, 0.95, t),
+      // Ny veg starter like foran bilen, og vokser bakover mens den gamle toner ut.
+      back: -Math.max(2, travel.total - easeInOut(t) * travel.total) - (BACK - 2) * smooth(0.7, 1, t),
+    });
+  }
+  const current = layers[0];
+  const scenario = current.scenario;
 
   const svgRef = useRef<SVGSVGElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -270,19 +330,11 @@ export function Board() {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const pz = usePanZoom(
-    size,
-    { token: focusToken, points: focusPoints(SCENARIOS[index], highlight) },
-    SCENARIOS[index].view?.focus ?? DEFAULT_FOCUS,
-  );
-
-  // Transportbånd: nåværende scenario ruller bakover, neste kommer inn forfra.
-  const travel = next === null ? 0 : easeInOut(progress) * CONVEYOR_DISTANCE;
-  const layers: Layer[] = [{ scenario: SCENARIOS[index], dv: -travel, active: next === null }];
-  if (next !== null) layers.push({ scenario: SCENARIOS[next], dv: CONVEYOR_DISTANCE - travel, active: false });
+  const homeFocus = frameFor(pose, playerWorld(pose)).map(scenario.view?.focus ?? DEFAULT_FOCUS);
+  const pz = usePanZoom(size, { token: focusToken, points: focusPoints(scenario, current.frame, highlight) }, homeFocus);
 
   // Klikk-/rekkefølgespørsmål: klikk i tegningen besvarer spørsmålet i stedet for å vise info.
-  const picking = next === null && isSceneQuestion(question) && !answers[question!.id];
+  const picking = !driving && isSceneQuestion(question) && !answers[question!.id];
 
   const interactive = (kind: SelectionKind, id: string) => ({
     selected: selected?.kind === kind && selected.id === id,
@@ -300,70 +352,71 @@ export function Board() {
   });
 
   // Stående figurer sorteres bakfra og frem.
-  const figures: { key: string; d: number; node: ReactNode }[] = [];
-  for (const { scenario, dv, active } of layers) {
-    const pre = `${scenario.id}:`;
-    for (const decor of scenario.decor ?? []) {
-      figures.push({
-        key: pre + decor.type + decor.pos.join(","),
-        d: depth(decor.pos[0], decor.pos[1] + dv),
-        node: <DecorFigure decor={decor} dv={dv} />,
-      });
+  const figures: { key: string; d: number; opacity: number; node: ReactNode }[] = [];
+  for (const { scenario: sc, frame, active, figureOpacity: opacity } of layers) {
+    if (opacity <= 0.01) continue;
+    const pre = `${sc.id}:`;
+    const add = (key: string, pos: Vec2, node: ReactNode) =>
+      figures.push({ key: pre + key, d: depth(pos[0], pos[1]), opacity, node });
+    for (const decor of sc.decor ?? []) {
+      const pos = frame.map(decor.pos);
+      add(decor.type + decor.pos.join(","), pos, <DecorFigure decor={decor} pos={pos} forward={frame.dir([0, 1])} />);
     }
-    for (const sign of scenario.signs) {
+    for (const sign of sc.signs) {
+      const pos = frame.map(sign.pos);
       const it = active ? interactive("sign", sign.id) : INACTIVE;
-      figures.push({
-        key: pre + sign.id,
-        d: depth(sign.pos[0], sign.pos[1] + dv),
-        node: <SignFigure sign={sign} dv={dv} {...it} />,
-      });
+      add(sign.id, pos, <SignFigure
+          sign={sign}
+          pos={pos}
+          normal={frame.dir(DIR[sign.facing])}
+          forceFront={sign.facing === "S"}
+          {...it}
+        />);
     }
-    for (const veh of scenario.vehicles) {
+    for (const veh of sc.vehicles) {
+      const pos = frame.map(veh.pos);
       const it = active ? interactive("vehicle", veh.id) : INACTIVE;
-      figures.push({
-        key: pre + veh.id,
-        d: depth(veh.pos[0], veh.pos[1] + dv),
-        node: (
-          <CarFigure
-            type={veh.type}
-            pos={[veh.pos[0], veh.pos[1] + dv]}
-            heading={veh.heading}
-            color={veh.color ?? DEFAULT_COLOR}
-            indicator={veh.indicator}
-            siren={veh.siren}
-            {...it}
-          />
-        ),
-      });
+      add(
+        veh.id,
+        pos,
+        <CarFigure
+          type={veh.type}
+          pos={pos}
+          heading={frame.heading(veh.heading)}
+          color={veh.color ?? DEFAULT_COLOR}
+          indicator={veh.indicator}
+          siren={veh.siren}
+          {...it}
+        />,
+      );
     }
-    for (const ped of scenario.pedestrians ?? []) {
+    for (const ped of sc.pedestrians ?? []) {
+      const pos = frame.map(ped.pos);
       const it = active ? interactive("pedestrian", ped.id) : INACTIVE;
-      const moved = { ...ped, pos: [ped.pos[0], ped.pos[1] + dv] as Vec2 };
-      figures.push({
-        key: pre + ped.id,
-        d: depth(moved.pos[0], moved.pos[1]),
-        node: <PedestrianFigure ped={moved} {...it} />,
-      });
+      add(ped.id, pos, <PedestrianFigure ped={{ ...ped, pos, heading: frame.heading(ped.heading) }} {...it} />);
+    }
+    for (const animal of sc.animals ?? []) {
+      const pos = frame.map(animal.pos);
+      const it = active ? interactive("animal", animal.id) : INACTIVE;
+      add(animal.id, pos, <AnimalFigure animal={{ ...animal, pos, heading: frame.heading(animal.heading) }} {...it} />);
     }
   }
   figures.push({
     key: "player",
     d: depth(PLAYER_U, 0),
+    opacity: 1,
     node: (
       <CarFigure
         pos={[PLAYER_U, 0]}
-        heading="N"
+        heading={carHeading}
         color={PLAYER_COLOR}
-        indicator={SCENARIOS[index].player.indicator}
-        className={`player${next !== null ? " is-driving" : ""}`}
-        {...(next === null ? interactive("vehicle", PLAYER_ID) : INACTIVE)}
+        indicator={scenario.player.indicator}
+        className={`player${driving ? " is-driving" : ""}`}
+        {...(driving ? INACTIVE : interactive("vehicle", PLAYER_ID))}
       />
     ),
   });
   figures.sort((a, b) => a.d - b.d);
-
-  const current = layers[0];
-  const scenario = current.scenario;
 
   // Kjøreruter: valgt kjøretøy, eller alle når bryteren er på.
   const routes: { id: string; route: Route; color: string; trim?: number }[] = [];
@@ -378,6 +431,9 @@ export function Board() {
     for (const p of scenario.pedestrians ?? []) {
       if (p.route && isShown(p.id)) routes.push({ id: p.id, route: p.route, color: p.color ?? PED_COLOR, trim: 0.6 });
     }
+    for (const a of scenario.animals ?? []) {
+      if (a.route && isShown(a.id)) routes.push({ id: a.id, route: a.route, color: ANIMAL_COLOR, trim: 1.6 });
+    }
   }
 
   // Nummerskilt over kjøretøy i rekkefølgespørsmål: dine klikk, eller fasit etter svar.
@@ -391,9 +447,11 @@ export function Board() {
   const vehicleAt = (id: string): { pos: Vec2; h: number } | null => {
     if (id === PLAYER_ID) return { pos: [PLAYER_U, 0], h: vehicleTopHeight("personbil") };
     const v = scenario.vehicles.find((x) => x.id === id);
-    if (v) return { pos: v.pos, h: vehicleTopHeight(v.type) };
+    if (v) return { pos: current.frame.map(v.pos), h: vehicleTopHeight(v.type) };
     const p = scenario.pedestrians?.find((x) => x.id === id);
-    return p ? { pos: p.pos, h: 1.9 } : null;
+    if (p) return { pos: current.frame.map(p.pos), h: 1.9 };
+    const a = scenario.animals?.find((x) => x.id === id);
+    return a ? { pos: current.frame.map(a.pos), h: animalTopHeight(a.type) } : null;
   };
 
   return (
@@ -419,56 +477,62 @@ export function Board() {
       <g transform={`translate(${pz.view.x} ${pz.view.y}) scale(${pz.view.zoom})`}>
         <g transform={GROUND_MATRIX}>
           <Grid />
-          <MainRoad />
-          {layers.map(({ scenario, dv }, i) => (
-            <g key={scenario.id} transform={`translate(0 ${dv})`}>
-              <RoadFeatures road={scenario.road} extras={scenario.roadExtras} />
-              {/* Scenarioene deler midtlinjen mellom seg så den henger sammen på båndet */}
-              <CenterLine
-                scenario={scenario}
-                lo={i === 0 ? -ROAD_EXTENT : -SCENARIO_HALF}
-                hi={i === 0 && layers.length > 1 ? SCENARIO_HALF : ROAD_EXTENT}
-                highlighted={i === 0 && highlight.includes(CENTER_LINE_ID)}
-              />
-              <Markings markings={scenario.markings} highlight={scenario === current.scenario ? highlight : []} />
+          {layers.map(({ scenario: sc, frame, groundOpacity, back }, i) => (
+            <g key={sc.id} transform={frame.svg} opacity={groundOpacity} mask={`url(#back-${i})`}>
+              <defs>
+                {/* Vegen toner ut bak startplassen i stedet for å gå uendelig langt bakover */}
+                <linearGradient id={`back-grad-${i}`} gradientUnits="userSpaceOnUse" x1={0} y1={back - BACK_FADE} x2={0} y2={back}>
+                  <stop offset={0} stopColor="#000" />
+                  <stop offset={1} stopColor="#fff" />
+                </linearGradient>
+                <mask id={`back-${i}`} maskUnits="userSpaceOnUse" x={-400} y={-400} width={800} height={800}>
+                  <rect x={-400} y={-400} width={800} height={800} fill={`url(#back-grad-${i})`} />
+                </mask>
+              </defs>
+              <MainRoad />
+              <RoadFeatures road={sc.road} extras={sc.roadExtras} />
+              <CenterLine scenario={sc} highlighted={i === 0 && highlight.includes(CENTER_LINE_ID)} />
+              <Markings markings={sc.markings} highlight={i === 0 ? highlight : []} />
+              {i === 0 &&
+                routes.map((r) => <RouteArrow key={r.id} route={r.route} color={r.color} startTrim={r.trim} />)}
+              {/* Interessepunkter (kun i aktivt scenario) */}
+              {i === 0 && current.active && (
+                <g className="pois">
+                  {[
+                    ...sc.signs.map((s) => ({ kind: "sign" as const, id: s.id, pos: s.pos })),
+                    ...sc.vehicles.map((v) => ({
+                      kind: "vehicle" as const,
+                      id: v.id,
+                      pos: v.pos,
+                      r: v.type === "buss" ? 6.8 : v.type === "utrykning" ? 4 : undefined,
+                    })),
+                    ...(sc.pedestrians ?? []).map((p) => ({ kind: "pedestrian" as const, id: p.id, pos: p.pos })),
+                    ...(sc.animals ?? []).map((a) => ({ kind: "animal" as const, id: a.id, pos: a.pos })),
+                    // Egen bil får ring bare når den kan være et svar.
+                    ...(picking ? [{ kind: "vehicle" as const, id: PLAYER_ID, pos: [PLAYER_U, 0] as Vec2 }] : []),
+                  ].map(({ kind, id, pos, ...rest }) => {
+                    const r = ("r" in rest && rest.r) || POI_RADIUS[kind];
+                    const it = interactive(kind, id);
+                    return (
+                      <g
+                        key={id}
+                        className={`poi${it.selected ? " is-selected" : ""}${it.hovered ? " is-hovered" : ""}${it.highlighted ? " is-highlighted" : ""}`}
+                        {...it.handlers}
+                      >
+                        <circle cx={pos[0]} cy={pos[1]} r={r} className="poi-fill" />
+                        <circle cx={pos[0]} cy={pos[1]} r={r} className="poi-pulse" />
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
             </g>
           ))}
-          {routes.map((r) => (
-            <RouteArrow key={r.id} route={r.route} color={r.color} startTrim={r.trim} />
-          ))}
-          {/* Interessepunkter (kun i aktivt scenario) */}
-          {current.active && (
-            <g className="pois">
-              {[
-                ...current.scenario.signs.map((s) => ({ kind: "sign" as const, id: s.id, pos: s.pos })),
-                ...current.scenario.vehicles.map((v) => ({
-                  kind: "vehicle" as const,
-                  id: v.id,
-                  pos: v.pos,
-                  r: v.type === "buss" ? 6.8 : v.type === "utrykning" ? 4 : undefined,
-                })),
-                ...(current.scenario.pedestrians ?? []).map((p) => ({ kind: "pedestrian" as const, id: p.id, pos: p.pos })),
-                // Egen bil får ring bare når den kan være et svar.
-                ...(picking ? [{ kind: "vehicle" as const, id: PLAYER_ID, pos: [PLAYER_U, 0] as Vec2 }] : []),
-              ].map(({ kind, id, pos, ...rest }) => {
-                const r = ("r" in rest && rest.r) || POI_RADIUS[kind];
-                const it = interactive(kind, id);
-                return (
-                  <g
-                    key={id}
-                    className={`poi${it.selected ? " is-selected" : ""}${it.hovered ? " is-hovered" : ""}${it.highlighted ? " is-highlighted" : ""}`}
-                    {...it.handlers}
-                  >
-                    <circle cx={pos[0]} cy={pos[1]} r={r} className="poi-fill" />
-                    <circle cx={pos[0]} cy={pos[1]} r={r} className="poi-pulse" />
-                  </g>
-                );
-              })}
-            </g>
-          )}
         </g>
         {figures.map((f) => (
-          <g key={f.key}>{f.node}</g>
+          <g key={f.key} opacity={f.opacity < 1 ? f.opacity : undefined}>
+            {f.node}
+          </g>
         ))}
         {badges.map(({ id, n, kind }) => {
           const at = vehicleAt(id);

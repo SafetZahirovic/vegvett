@@ -1,6 +1,6 @@
 import type { CenterLineType, Dir, Marking, RoadExtra, RoadLayout, Scenario, Vec2 } from "../scenarios/types";
 import { DIR } from "./iso";
-import { CENTER_DASH, HW, RB_INNER, RB_OUTER, RB_SPLITTER, ROAD_EXTENT as E } from "./road";
+import { CENTER_DASH, CYCLE_GAP, CYCLE_WIDTH, HW, RB_INNER, RB_OUTER, RB_SPLITTER, ROAD_EXTENT as E } from "./road";
 
 /**
  * Alt som ligger flatt på bakken tegnes i [u, v]-meter inne i en gruppe med
@@ -50,7 +50,12 @@ const DASH: Record<CenterLineType, [number, number] | null> = {
   midtlinje: [...CENTER_DASH],
   varsellinje: [9, 3],
   sperrelinje: null,
+  midtdeler: null,
 };
+
+/** Halv bredde på et smalt vegparti. */
+const NARROW_HALF = 2.3;
+const NARROW_TAPER = 6;
 
 /** Strekninger (v) der hovedvegens midtlinje skal ha opphold, f.eks. gjennom kryss. */
 function centerGaps(road: RoadLayout): [number, number][] {
@@ -80,23 +85,24 @@ function subtract([a, b]: [number, number], gaps: [number, number][]): [number, 
   return parts;
 }
 
-/**
- * Hovedvegens midtlinje for ett scenario, tegnet i v ∈ [lo, hi). Strekmønsteret er
- * forankret i v = 0, så det henger sammen mellom scenarioene på transportbåndet.
- */
+/** Hovedvegens midtlinje for ett scenario, tegnet i v ∈ [lo, hi). Strekmønsteret er forankret i v = 0. */
+function extraGaps(extras: RoadExtra[] = []): [number, number][] {
+  return extras.flatMap((x): [number, number][] => (x.type === "smalt" ? [[x.from - 2, x.to + 2]] : []));
+}
+
 export function CenterLine({
   scenario,
-  lo,
-  hi,
+  lo = -E,
+  hi = E,
   highlighted = false,
 }: {
   scenario: Scenario;
-  lo: number;
-  hi: number;
+  lo?: number;
+  hi?: number;
   highlighted?: boolean;
 }) {
   const segments = scenario.centerLine ?? [{ type: "midtlinje" as const }];
-  const gaps = centerGaps(scenario.road);
+  const gaps = [...centerGaps(scenario.road), ...extraGaps(scenario.roadExtras)];
   return (
     <g className={highlighted ? "is-highlighted-line" : undefined}>
       {segments.flatMap((seg, i) => {
@@ -105,6 +111,15 @@ export function CenterLine({
         const dash = DASH[seg.type];
         // Sperrelinje som midtlinje tegnes dobbel (1006.4); en enkel sperrelinje brukes ikke alene.
         const offsets = seg.type === "sperrelinje" ? [-0.15, 0.15] : [0];
+        if (seg.type === "midtdeler") {
+          // Midtdeler (motorveg): smal øy med rekkverk, skiller kjøreretningene fysisk.
+          return subtract(range, gaps).map(([a, b]) => (
+            <g key={`${i}:${a}`}>
+              <rect x={-0.6} y={a} width={1.2} height={b - a} className="island" />
+              <line x1={0} y1={a} x2={0} y2={b} className="guardrail" />
+            </g>
+          ));
+        }
         return subtract(range, gaps).flatMap(([a, b]) =>
           offsets.map((x) => (
             <line
@@ -265,11 +280,73 @@ function Busslomme({ from, to }: { from: number; to: number }) {
   );
 }
 
+/** Sykkelsymbol liggende på bakken (to hjul og ramme), sentrert i (x, y), sett i kjøreretningen. */
+function BikeSymbol({ x, y }: { x: number; y: number }) {
+  return (
+    <g className="bike-symbol" transform={`translate(${x} ${y})`}>
+      <circle cx={0} cy={-0.55} r={0.35} />
+      <circle cx={0} cy={0.55} r={0.35} />
+      <polyline points="0,-0.55 0,0.1 0.25,0.55 0,0.1 -0.3,-0.1 0.25,0.1" />
+    </g>
+  );
+}
+
+/** Gang- og sykkelveg langs hovedvegen. */
+function Sykkelveg({ side, from = -E, to = E }: { side: "left" | "right"; from?: number; to?: number }) {
+  const k = side === "right" ? 1 : -1;
+  const inner = HW + SHOULDER + CYCLE_GAP;
+  const x0 = k > 0 ? inner : -inner - CYCLE_WIDTH;
+  const mid = k * (inner + CYCLE_WIDTH / 2);
+  const symbols: number[] = [];
+  for (let v = Math.ceil(from / 25) * 25; v <= to; v += 25) symbols.push(v);
+  return (
+    <g>
+      <rect x={x0} y={from} width={CYCLE_WIDTH} height={to - from} className="cycle-path" />
+      <line x1={x0} y1={from} x2={x0} y2={to} className="road-edge" />
+      <line x1={x0 + CYCLE_WIDTH} y1={from} x2={x0 + CYCLE_WIDTH} y2={to} className="road-edge" />
+      {symbols.map((v) => (
+        <BikeSymbol key={v} x={mid} y={v} />
+      ))}
+    </g>
+  );
+}
+
+/** Smalt vegparti: grøntområde dekker kjørebanen utenfor ett felts bredde, med skrå overganger. */
+function Smalt({ from, to }: { from: number; to: number }) {
+  const w = HW + SHOULDER + 0.05;
+  const n = NARROW_HALF;
+  const side = (k: 1 | -1) => {
+    const outline: Vec2[] = [
+      [k * w, from],
+      [k * n, from + NARROW_TAPER],
+      [k * n, to - NARROW_TAPER],
+      [k * w, to],
+    ];
+    return (
+      <g key={k}>
+        <polygon points={poly(outline)} className="verge" />
+        <polyline points={poly(outline)} className="road-edge" fill="none" />
+        <polyline
+          points={poly(outline.map(([x, y]) => [x - k * 0.2, y] as Vec2))}
+          className="paint-line"
+          strokeWidth={LINE}
+          fill="none"
+        />
+      </g>
+    );
+  };
+  return (
+    <g>
+      {side(1)}
+      {side(-1)}
+    </g>
+  );
+}
+
 /** Veiens spesielle deler for et scenario (kryss osv.). */
 export function RoadFeatures({ road, extras = [] }: { road: RoadLayout; extras?: RoadExtra[] }) {
   return (
     <g>
-      {extras.map((x, i) => (x.type === "busslomme" ? <Busslomme key={i} from={x.from} to={x.to} /> : null))}
       {road.type === "t-kryss" && <SideRoad at={road.at} side={road.branch === "right" ? 1 : -1} />}
       {road.type === "x-kryss" && (
         <>
@@ -278,6 +355,16 @@ export function RoadFeatures({ road, extras = [] }: { road: RoadLayout; extras?:
         </>
       )}
       {road.type === "rundkjoring" && <Roundabout at={road.at} />}
+      {/* Etter kryssene, så gang- og sykkelvegen ligger over sidevegene der den krysser dem */}
+      {extras.map((x, i) =>
+        x.type === "busslomme" ? (
+          <Busslomme key={i} from={x.from} to={x.to} />
+        ) : x.type === "smalt" ? (
+          <Smalt key={i} from={x.from} to={x.to} />
+        ) : (
+          <Sykkelveg key={i} side={x.side} from={x.from} to={x.to} />
+        ),
+      )}
     </g>
   );
 }

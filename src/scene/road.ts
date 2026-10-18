@@ -14,5 +14,6 @@ export const RB_INNER = 6;
 export const RB_DRIVE = (RB_OUTER + RB_INNER) / 2;
 /** Lengden på trafikkøyene (dråpene) i armene inn mot rundkjøringen. */
 export const RB_SPLITTER = 7;
-/** Hvert scenario eier midtlinjen i v ∈ [-SCENARIO_HALF, SCENARIO_HALF). Halve transportbåndlengden. */
-export const SCENARIO_HALF = 48;
+/** Gang- og sykkelveg: avstand fra kjørebanens kant og bredde. */
+export const CYCLE_GAP = 2.5;
+export const CYCLE_WIDTH = 3;

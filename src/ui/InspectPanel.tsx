@@ -3,7 +3,7 @@ import { PLAYER_ID } from "../scenarios/types";
 import { CATEGORY_LABEL, getSign, signTitle } from "../signs/registry";
 import { getSignDataUrl } from "../signs/textures";
 import { useGame, useHiddenSigns, useScenario } from "../state/store";
-import { INDICATOR_LABEL, TURN_LABEL, VEHICLE_LABEL } from "./labels";
+import { ANIMAL_LABEL, INDICATOR_LABEL, TURN_LABEL, VEHICLE_LABEL } from "./labels";
 
 
 export function InspectPanel() {
@@ -39,6 +39,21 @@ export function InspectPanel() {
         </dl>
         <p>{def.explanation}</p>
         <p className="rule-ref">{def.rule}</p>
+      </>
+    );
+  } else if (selected.kind === "animal") {
+    const animal = scenario.animals?.find((a) => a.id === selected.id);
+    if (!animal) return null;
+    body = (
+      <>
+        <h2>{animal.name ?? ANIMAL_LABEL[animal.type]}</h2>
+        <dl className="inspect-meta">
+          <dt>Dyr</dt>
+          <dd>{ANIMAL_LABEL[animal.type]}</dd>
+          <dt>Bevegelse</dt>
+          <dd>{animal.route ? "Vist som pil på bakken" : "Står stille"}</dd>
+        </dl>
+        <p className="rule-ref">Dyr kan bevege seg uforutsigbart. Senk farten og vær klar til å stanse.</p>
       </>
     );
   } else if (selected.kind === "pedestrian") {

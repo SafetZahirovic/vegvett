@@ -1,9 +1,9 @@
 import type { CSSProperties, SVGProps } from "react";
-import type { Decor, Heading, Pedestrian, SignPlacement, Vec2, VehicleType } from "../scenarios/types";
+import type { Animal, AnimalType, Decor, Heading, Pedestrian, SignPlacement, Vec2, VehicleType } from "../scenarios/types";
 import { getSign } from "../signs/registry";
 import { shapePoints } from "../signs/shapes";
 import { getSignDataUrl } from "../signs/textures";
-import { DIR, P, boxFaces, facesViewer, groundEllipse, headingVec, pts, rightOf } from "./iso";
+import { P, boxFaces, facesViewer, groundEllipse, headingVec, pts, rightOf } from "./iso";
 
 /**
  * Stående figurer tegnes i skjermkoordinater (meter × zoom) med P(u, v, h).
@@ -17,29 +17,42 @@ const SIGN_BOTTOM = 2.4;
 
 export function SignFigure({
   sign,
-  dv,
+  pos,
+  normal,
+  forceFront = false,
   selected,
   hovered,
   highlighted,
   handlers,
 }: {
   sign: SignPlacement;
-  dv: number;
+  /** Stolpens fotpunkt i kamerakoordinater. */
+  pos: Vec2;
+  /** Retningen skiltflaten vender mot, i kamerakoordinater. */
+  normal: Vec2;
+  /**
+   * Vis alltid forsiden (lesbart), også når skiltet vender bort fra kameraet.
+   * Brukes for skilt som gjelder spilleren, så de kan leses uansett kjøreretning.
+   */
+  forceFront?: boolean;
   selected: boolean;
   hovered: boolean;
   highlighted: boolean;
   handlers?: Handlers;
 }) {
   const def = getSign(sign.code);
-  const [u, v] = [sign.pos[0], sign.pos[1] + dv];
-  const n = DIR[sign.facing];
-  const r = rightOf([-n[0], -n[1]]);
+  const [u, v] = pos;
+  const n = normal;
+  const facing = facesViewer(n);
+  const front = facing || forceFront;
+  // Sett bakfra speilvendes planet, så forsiden blir lesbar.
+  const k = facing ? 1 : -1;
+  const r = rightOf([-n[0] * k, -n[1] * k]);
   const [rx, ry] = P(r[0], r[1]);
   const h = SIGN_BOTTOM + SIGN_SIZE / 2;
   const [cx, cy] = P(u, v, h);
   const [bx, by] = P(u, v, 0);
   const s = SIGN_SIZE;
-  const front = facesViewer(n);
   const shape = shapePoints(def.shape);
   const outline = shape ? (
     <polygon points={shape.map(([x, y]) => `${x * s},${-y * s}`).join(" ")} />
@@ -167,8 +180,8 @@ export function CarFigure({
   );
 }
 
-export function DecorFigure({ decor, dv }: { decor: Decor; dv: number }) {
-  const [u, v] = [decor.pos[0], decor.pos[1] + dv];
+export function DecorFigure({ decor, pos, forward }: { decor: Decor; pos: Vec2; forward: Vec2 }) {
+  const [u, v] = pos;
   const k = decor.size ?? 1;
   if (decor.type === "tre") {
     const [x, y] = P(u, v);
@@ -182,7 +195,7 @@ export function DecorFigure({ decor, dv }: { decor: Decor; dv: number }) {
       </g>
     );
   }
-  const faces = boxFaces([u, v], [0, 1], 9 * k, 7 * k, 0, 4 * k);
+  const faces = boxFaces([u, v], forward, 9 * k, 7 * k, 0, 4 * k);
   return (
     <g className="fig decor">
       {faces.map((face, i) => (
@@ -222,6 +235,85 @@ export function PedestrianFigure({
         <polygon key={i} points={face.points} className={`car-${face.kind}`} />
       ))}
       <circle cx={hx} cy={hy} r={0.24} className="car-top" />
+    </g>
+  );
+}
+
+type AnimalShape = {
+  len: number;
+  wid: number;
+  /** Høyde på beina (underkant kropp) og kroppens overkant. */
+  legs: number;
+  top: number;
+  /** Hode foran på kroppen. */
+  head: { len: number; h: [number, number] };
+  antlers: boolean;
+  color: string;
+};
+
+const ANIMALS: Record<AnimalType, AnimalShape> = {
+  elg: { len: 2.6, wid: 0.8, legs: 1.15, top: 2.0, head: { len: 0.7, h: [1.7, 2.2] }, antlers: true, color: "#d9a066" },
+  rein: { len: 1.8, wid: 0.6, legs: 0.7, top: 1.25, head: { len: 0.5, h: [1.1, 1.45] }, antlers: true, color: "#e6dcc8" },
+  hjort: { len: 1.9, wid: 0.6, legs: 0.8, top: 1.35, head: { len: 0.5, h: [1.2, 1.6] }, antlers: true, color: "#c98a5a" },
+  ku: { len: 2.3, wid: 0.9, legs: 0.7, top: 1.45, head: { len: 0.55, h: [1.0, 1.45] }, antlers: false, color: "#f0f0f0" },
+  sau: { len: 1.2, wid: 0.6, legs: 0.4, top: 0.9, head: { len: 0.35, h: [0.6, 0.95] }, antlers: false, color: "#fafafa" },
+};
+
+export const animalTopHeight = (type: AnimalType) => ANIMALS[type].top + (ANIMALS[type].antlers ? 0.5 : 0);
+
+/** Dyr: kropp på fire bein, hode foran og eventuelt gevir. */
+export function AnimalFigure({
+  animal,
+  selected,
+  hovered,
+  highlighted,
+  handlers,
+}: {
+  animal: Animal;
+  selected: boolean;
+  hovered: boolean;
+  highlighted: boolean;
+  handlers?: Handlers;
+}) {
+  const S = ANIMALS[animal.type];
+  const f = headingVec(animal.heading);
+  const r = rightOf(f);
+  const c = animal.pos;
+  const at = (fw: number, rt: number): Vec2 => [c[0] + f[0] * fw + r[0] * rt, c[1] + f[1] * fw + r[1] * rt];
+  const legW = Math.max(0.12, S.wid * 0.22);
+  const legs = [
+    [S.len * 0.32, S.wid * 0.3],
+    [S.len * 0.32, -S.wid * 0.3],
+    [-S.len * 0.32, S.wid * 0.3],
+    [-S.len * 0.32, -S.wid * 0.3],
+  ].flatMap(([fw, rt]) => boxFaces(at(fw, rt), f, legW, legW, 0, S.legs));
+  const body = boxFaces(c, f, S.len, S.wid, S.legs, S.top);
+  const headC = at(S.len / 2 + S.head.len / 2 - 0.1, 0);
+  const head = boxFaces(headC, f, S.head.len, S.wid * 0.55, S.head.h[0], S.head.h[1]);
+  const footprint = boxFaces(c, f, S.len + 0.4, S.wid + 0.4, 0, 0).find((x) => x.kind === "top")!;
+  // Gevir: to grener fra hodet, ut til sidene og opp.
+  const antlers = S.antlers
+    ? [-1, 1].map((k) => {
+        const base = at(S.len / 2 + 0.05, k * 0.15);
+        const tip = at(S.len / 2 - 0.1, k * (S.wid * 0.9));
+        const p0 = P(base[0], base[1], S.head.h[1]);
+        const p1 = P(tip[0], tip[1], S.head.h[1] + 0.45);
+        const mid = P((base[0] + tip[0]) / 2, (base[1] + tip[1]) / 2, S.head.h[1] + 0.25);
+        const midTip = P((base[0] + tip[0]) / 2, (base[1] + tip[1]) / 2, S.head.h[1] + 0.55);
+        return pts([p0, p1]) + "|" + pts([mid, midTip]);
+      })
+    : [];
+  return (
+    <g
+      className={`fig car animal${selected ? " is-selected" : ""}${hovered ? " is-hovered" : ""}${highlighted ? " is-highlighted" : ""}`}
+      style={{ "--car": S.color } as CSSProperties}
+      {...handlers}
+    >
+      <polygon points={footprint.points} className="car-shadow" />
+      {[...legs, ...body, ...head].map((face, i) => (
+        <polygon key={i} points={face.points} className={`car-${face.kind}`} />
+      ))}
+      {antlers.flatMap((a, i) => a.split("|").map((p, j) => <polyline key={`${i}${j}`} points={p} className="antler" />))}
     </g>
   );
 }

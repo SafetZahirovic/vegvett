@@ -11,8 +11,11 @@ og fotgjengere for å se hva de betyr og hvor de skal kjøre. Deretter svarer du
 Svarer du feil, får du en kort forklaring med henvisning til regelen, og det som gjelder, blir
 markert i tegningen.
 
-Spillet dekker blant annet vikeplikt og høyreregelen, forkjørsveg, stopp, rundkjøring, gangfelt,
-buss ved holdeplass, utrykningskjøretøy, sperre- og varsellinje, forbikjøring, fartsgrenser og fareskilt.
+Spillet har 35 scenarioer og over 50 skilt. Det dekker blant annet vikeplikt og høyreregelen,
+forkjørsveg, stopp, rundkjøring, gangfelt, gang- og sykkelveg, buss ved holdeplass, utrykningskjøretøy,
+sperre- og varsellinje, forbikjøring, møteplikt, vegarbeid, motorveg, parkering og stans, fartsgrenser,
+fareskilt og dyr i vegen (elg, rein og sau). Mellom scenarioene kjører bilen ruten sin: den svinger i
+kryss og kjører rundt i rundkjøringen, og neste scenario fortsetter i den retningen bilen kom ut.
 Det finnes fire typer spørsmål: flervalg, ja/nei, klikk i tegningen og rekkefølge gjennom krysset.
 
 Spillet er laget for å øve, og det erstatter ikke offisielt læremateriell. Regelpåstandene står samlet i

@@ -1,4 +1,5 @@
-import { C, TEX, fillShape, pathShape, px, redBorder, text } from "./draw";
+import { C, TEX, carFromBehind, fillShape, pathShape, px, redBorder, text } from "./draw";
+import { moreSigns } from "./more";
 import type { SignShape } from "./shapes";
 
 /**
@@ -36,27 +37,6 @@ export type SignDef = {
   /** Tegner forsiden på et TEX×TEX-canvas. `value` brukes f.eks. for fartsgrense. */
   draw: (ctx: CanvasRenderingContext2D, value?: number) => void;
 };
-
-/** Bil sett bakfra (til skilt 334). cx i normaliserte enheter. */
-function carFromBehind(ctx: CanvasRenderingContext2D, cx: number, color: string) {
-  const w = 0.3 * TEX;
-  const [x, y] = px(cx - 0.15, 0.02);
-  ctx.fillStyle = color;
-  // Tak og vinduparti
-  ctx.beginPath();
-  ctx.roundRect(x + w * 0.16, y - 0.1 * TEX, w * 0.68, 0.12 * TEX, [0.035 * TEX, 0.035 * TEX, 0, 0]);
-  ctx.fill();
-  // Karosseri
-  ctx.beginPath();
-  ctx.roundRect(x, y, w, 0.11 * TEX, 0.025 * TEX);
-  ctx.fill();
-  // Hjul
-  ctx.fillRect(x + w * 0.06, y + 0.1 * TEX, w * 0.2, 0.06 * TEX);
-  ctx.fillRect(x + w * 0.74, y + 0.1 * TEX, w * 0.2, 0.06 * TEX);
-  // Bakrute
-  ctx.fillStyle = C.white;
-  ctx.fillRect(x + w * 0.26, y - 0.07 * TEX, w * 0.48, 0.05 * TEX);
-}
 
 /** Tykk pil langs en bue (til skilt 406). Vinkler i canvas-radianer. */
 function arcArrow(ctx: CanvasRenderingContext2D, r: number, a0: number, a1: number) {
@@ -268,7 +248,7 @@ const defs: SignDef[] = [
   },
 ];
 
-export const SIGNS: Record<string, SignDef> = Object.fromEntries(defs.map((d) => [d.code, d]));
+export const SIGNS: Record<string, SignDef> = Object.fromEntries([...defs, ...moreSigns].map((d) => [d.code, d]));
 
 export function getSign(code: string): SignDef {
   const def = SIGNS[code];

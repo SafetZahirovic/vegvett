@@ -1,4 +1,4 @@
-import { PLAYER_ID, type Question, type Scenario, type Topic, type Turn, type VehicleType } from "../scenarios/types";
+import { PLAYER_ID, type AnimalType, type Question, type Scenario, type Topic, type Turn, type VehicleType } from "../scenarios/types";
 import { signTitle } from "../signs/registry";
 
 export const VEHICLE_LABEL: Record<VehicleType, string> = {
@@ -7,6 +7,14 @@ export const VEHICLE_LABEL: Record<VehicleType, string> = {
   buss: "Buss",
   utrykning: "Utrykningskjøretøy",
 };
+export const ANIMAL_LABEL: Record<AnimalType, string> = {
+  elg: "Elg",
+  rein: "Rein",
+  hjort: "Hjort",
+  ku: "Ku",
+  sau: "Sau",
+};
+
 export const INDICATOR_LABEL = { left: "Blinker til venstre", right: "Blinker til høyre" };
 export const TURN_LABEL: Record<Turn, string> = {
   straight: "Kjører rett frem",
@@ -24,6 +32,8 @@ export function objectName(scenario: Scenario, id: string): string {
   if (v) return v.name ?? VEHICLE_LABEL[v.type];
   const p = scenario.pedestrians?.find((x) => x.id === id);
   if (p) return p.name ?? "Fotgjenger";
+  const a = scenario.animals?.find((x) => x.id === id);
+  if (a) return a.name ?? ANIMAL_LABEL[a.type];
   const s = scenario.signs.find((x) => x.id === id);
   if (s) return `Skilt: ${signTitle(s.code, s.value)}`;
   return id;
@@ -39,6 +49,8 @@ export const TOPIC_LABEL: Record<Topic, string> = {
   utrykning: "Utrykning",
   buss: "Buss",
   fart: "Fart",
+  dyr: "Dyr",
+  sykkel: "Sykkel",
 };
 
 /** Lesbar tekst for et svar (brukt på resultatsiden). */

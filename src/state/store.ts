@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { SCENARIOS } from "../scenarios";
 import type { Question, Scenario } from "../scenarios/types";
+import { START_POSE, planTravel, type Pose, type Travel } from "../scene/pose";
 import { useProgress } from "./progress";
 import { pickScenario, shuffledScenarioOrder } from "./selection";
 
@@ -24,7 +25,7 @@ type Exam = {
   log: ExamEntry[];
 };
 
-export type SelectionKind = "sign" | "vehicle" | "pedestrian";
+export type SelectionKind = "sign" | "vehicle" | "pedestrian" | "animal";
 export type Selection = { kind: SelectionKind; id: string } | null;
 
 export type AnswerValue = string | boolean;
@@ -49,6 +50,10 @@ type GameState = {
   next: number | null;
   /** Fremdrift i overgangen, 0–1. */
   progress: number;
+  /** Hvor nåværende scenario ligger i verden (endres når bilen svinger). */
+  pose: Pose;
+  /** Kjøreturen til neste scenario, mens overgangen pågår. */
+  travel: Travel | null;
   hovered: string | null;
   selected: Selection;
   /** Økes for å be kartet sentrere på bilen igjen. */
@@ -109,6 +114,8 @@ export const useGame = create<GameState>((set, get) => ({
   index: startArk ?? 0,
   next: null,
   progress: 0,
+  pose: START_POSE,
+  travel: null,
   hovered: null,
   selected: null,
   viewResetToken: 0,
@@ -171,6 +178,7 @@ export const useGame = create<GameState>((set, get) => ({
     }
     set({
       next: target,
+      travel: planTravel(SCENARIOS[index], get().pose),
       progress: 0,
       selected: null,
       hovered: null,
@@ -183,7 +191,7 @@ export const useGame = create<GameState>((set, get) => ({
     // Første gang: begynn med den rolige landeveien.
     const first = Math.max(0, SCENARIOS.findIndex((s) => s.id === FIRST_SCENARIO_ID));
     const index = scenariosPlayed === 0 ? first : pickScenario(topics, new Set());
-    set({ ...freshScenario(), mode: "ovelse", screen: "play", exam: null, index, next: null, recent: [] });
+    set({ ...freshScenario(), mode: "ovelse", screen: "play", exam: null, index, next: null, recent: [], pose: START_POSE, travel: null });
   },
   startExam: () => {
     const order = shuffledScenarioOrder();
@@ -194,6 +202,8 @@ export const useGame = create<GameState>((set, get) => ({
       exam: { order, pos: 0, log: [] },
       index: order[0],
       next: null,
+      pose: START_POSE,
+      travel: null,
       showAllRoutes: false,
     });
   },
@@ -207,7 +217,15 @@ export const useGame = create<GameState>((set, get) => ({
   },
   setScreen: (screen) => set({ screen, selected: null }),
   setProgress: (progress) => set({ progress }),
-  finishTransition: () => set((s) => ({ ...freshScenario(), index: s.next ?? s.index, next: null, progress: 0 })),
+  finishTransition: () =>
+    set((s) => ({
+      ...freshScenario(),
+      index: s.next ?? s.index,
+      pose: s.travel?.nextPose ?? s.pose,
+      travel: null,
+      next: null,
+      progress: 0,
+    })),
 }));
 
 export const useScenario = (): Scenario => useGame((s) => SCENARIOS[s.index]);

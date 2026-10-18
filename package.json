@@ -2,6 +2,17 @@
   "name": "vegvett",
   "private": true,
   "version": "0.1.0",
+  "description": "Nettleserspill for teoriprøven klasse B: norske trafikkregler i en isometrisk blueprint-tegning med skilt, vikeplikt, rundkjøring og prøvemodus.",
+  "license": "MIT",
+  "keywords": [
+    "teoriprøven",
+    "trafikkregler",
+    "førerkort",
+    "klasse-b",
+    "norsk",
+    "vikeplikt",
+    "trafikkskilt"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",

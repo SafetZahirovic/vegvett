@@ -3,6 +3,24 @@
 Nettleserspill for teoriprøven klasse B. Trafikkreglene vises som en isometrisk «blueprint»-tegning,
 der veien glir under bilen som et transportbånd mellom scenarioene.
 
+## Om spillet
+
+Vegvett lærer deg norske trafikkregler gjennom korte situasjoner på en sammenhengende kjøretur.
+Du styrer ikke bilen. I stedet utforsker du tegningen: panorer og zoom, og klikk på skilt, kjøretøy
+og fotgjengere for å se hva de betyr og hvor de skal kjøre. Deretter svarer du på 1–3 spørsmål.
+Svarer du feil, får du en kort forklaring med henvisning til regelen, og det som gjelder, blir
+markert i tegningen.
+
+Spillet dekker blant annet vikeplikt og høyreregelen, forkjørsveg, stopp, rundkjøring, gangfelt,
+buss ved holdeplass, utrykningskjøretøy, sperre- og varsellinje, forbikjøring, fartsgrenser og fareskilt.
+Det finnes fire typer spørsmål: flervalg, ja/nei, klikk i tegningen og rekkefølge gjennom krysset.
+
+Spillet er laget for å øve, og det erstatter ikke offisielt læremateriell. Regelpåstandene står samlet i
+[CONTENT_REVIEW.md](CONTENT_REVIEW.md), slik at de kan kontrolleres mot trafikkreglene og
+Statens vegvesens materiell.
+
+## Kom i gang
+
 ```bash
 npm install
 npm run dev
@@ -30,3 +48,7 @@ Hurtigtaster: `1–4` eller `A–D` velger svar, `J`/`N` svarer ja/nei, og `Ente
 1. Kopier en fil i `src/scenarios/` som ligner (f.eks. `gangfelt.ts`).
 2. Endre id, veitype, skilt, oppmerking, kjøretøy og spørsmål.
 3. Ferdig – filen blir plukket opp automatisk. Før opp regelpåstandene i `CONTENT_REVIEW.md`.
+
+## Lisens
+
+[MIT](LICENSE)

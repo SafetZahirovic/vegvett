@@ -8,6 +8,7 @@ export const parkeringForbudt: Scenario = {
   title: "Parkering forbudt",
   topic: "skilt",
   difficulty: 2,
+  licences: ["B"],
   road: { type: "rett" },
   signs: [
     { id: "parkering", code: "372", pos: [HW + 1.5, 10], facing: "S" },

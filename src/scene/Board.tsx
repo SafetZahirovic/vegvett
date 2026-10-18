@@ -10,6 +10,7 @@ import {
 } from "react";
 import { SCENARIOS } from "../scenarios";
 import type { Scenario, Vec2 } from "../scenarios/types";
+import { useProgress } from "../state/progress";
 import { useGame, type SelectionKind } from "../state/store";
 import { CENTER_LINE_ID, PLAYER_ID, type Route } from "../scenarios/types";
 import { isSceneQuestion, useCurrentQuestion } from "../state/store";
@@ -34,7 +35,7 @@ const DEFAULT_COLOR = "#ffd166";
 const PED_COLOR = "#f4a7ff";
 const ANIMAL_COLOR = "#d9a066";
 
-const POI_RADIUS: Record<SelectionKind, number> = { sign: 1.5, vehicle: 3.4, pedestrian: 1.2, animal: 2.4 };
+const POI_RADIUS: Record<SelectionKind, number> = { sign: 1.5, vehicle: 3.4, pedestrian: 1.2, animal: 2.4, marker: 0.9 };
 
 /** Kjører overgangen: oppdaterer fremdrift hver frame til bilen har kjørt ferdig. */
 function useConveyor() {
@@ -265,6 +266,8 @@ function focusPoints(scenario: Scenario, frame: Frame, ids: string[]): Vec2[] {
     if (ped) at(ped.pos, 0.9);
     const animal = scenario.animals?.find((a) => a.id === id);
     if (animal) at(animal.pos, 1);
+    const marker = scenario.markers?.find((m) => m.id === id);
+    if (marker) at(marker.pos);
     const mark = scenario.markings.find((m) => m.id === id);
     if (mark) at([(mark.a[0] + mark.b[0]) / 2, (mark.a[1] + mark.b[1]) / 2]);
   }
@@ -287,6 +290,8 @@ export function Board() {
   const showAllRoutes = useGame((s) => s.showAllRoutes);
   const question = useCurrentQuestion();
   const focusToken = useGame((s) => s.focusToken);
+  const licence = useProgress((s) => s.licence);
+  const playerType = licence === "A" ? ("motorsykkel" as const) : ("personbil" as const);
   const { select, setHovered, pickInScene } = useGame.getState();
 
   // Bilen: står på startplassen, eller kjører ruten sin under overgangen. Kameraet følger den.
@@ -409,6 +414,7 @@ export function Board() {
     opacity: 1,
     node: (
       <CarFigure
+        type={playerType}
         pos={[PLAYER_U, 0]}
         heading={carHeading}
         color={PLAYER_COLOR}
@@ -447,7 +453,7 @@ export function Board() {
     list.forEach((id, i) => badges.push({ id, n: i + 1, kind: answered ? "answer" : "pick" }));
   }
   const vehicleAt = (id: string): { pos: Vec2; h: number } | null => {
-    if (id === PLAYER_ID) return { pos: [PLAYER_U, 0], h: vehicleTopHeight("personbil") };
+    if (id === PLAYER_ID) return { pos: [PLAYER_U, 0], h: vehicleTopHeight(playerType) };
     const v = scenario.vehicles.find((x) => x.id === id);
     if (v) return { pos: current.frame.map(v.pos), h: vehicleTopHeight(v.type) };
     const p = scenario.pedestrians?.find((x) => x.id === id);
@@ -510,6 +516,8 @@ export function Board() {
                     })),
                     ...(sc.pedestrians ?? []).map((p) => ({ kind: "pedestrian" as const, id: p.id, pos: p.pos })),
                     ...(sc.animals ?? []).map((a) => ({ kind: "animal" as const, id: a.id, pos: a.pos })),
+                    // Markører (f.eks. plassering i feltet) vises bare når de kan være et svar.
+                    ...(picking ? (sc.markers ?? []).map((m) => ({ kind: "marker" as const, id: m.id, pos: m.pos })) : []),
                     // Egen bil får ring bare når den kan være et svar.
                     ...(picking ? [{ kind: "vehicle" as const, id: PLAYER_ID, pos: [PLAYER_U, 0] as Vec2 }] : []),
                   ].map(({ kind, id, pos, ...rest }) => {
@@ -518,11 +526,18 @@ export function Board() {
                     return (
                       <g
                         key={id}
-                        className={`poi${it.selected ? " is-selected" : ""}${it.hovered ? " is-hovered" : ""}${it.highlighted ? " is-highlighted" : ""}`}
+                        className={`poi${kind === "marker" ? " is-marker" : ""}${it.selected ? " is-selected" : ""}${it.hovered ? " is-hovered" : ""}${it.highlighted ? " is-highlighted" : ""}`}
                         {...it.handlers}
                       >
-                        <circle cx={pos[0]} cy={pos[1]} r={r} className="poi-fill" />
-                        <circle cx={pos[0]} cy={pos[1]} r={r} className="poi-pulse" />
+                        {kind === "marker" ? (
+                          // Plassering i feltet: smal stripe langs feltet, lett å treffe.
+                          <rect x={pos[0] - 0.42} y={pos[1] - 3} width={0.84} height={6} rx={0.42} className="poi-fill" />
+                        ) : (
+                          <>
+                            <circle cx={pos[0]} cy={pos[1]} r={r} className="poi-fill" />
+                            <circle cx={pos[0]} cy={pos[1]} r={r} className="poi-pulse" />
+                          </>
+                        )}
                       </g>
                     );
                   })}

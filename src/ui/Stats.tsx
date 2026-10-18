@@ -1,12 +1,14 @@
 import { useState } from "react";
 import type { Topic } from "../scenarios/types";
 import { useGame } from "../state/store";
-import { useProgress } from "../state/progress";
+import { useProgress, useStats } from "../state/progress";
 import { TOPIC_LABEL } from "./labels";
 
 /** Riktig-prosent per tema, antall scenarioer og tidligere prøver. */
 export function Stats() {
-  const { topics, scenariosPlayed, exams, reset } = useProgress();
+  const { topics, scenariosPlayed, exams } = useStats();
+  const reset = useProgress((s) => s.reset);
+  const licence = useProgress((s) => s.licence);
   const setScreen = useGame((s) => s.setScreen);
   const [confirm, setConfirm] = useState(false);
   const rows = (Object.keys(TOPIC_LABEL) as Topic[]).map((t) => ({ topic: t, stat: topics[t] }));
@@ -19,7 +21,7 @@ export function Stats() {
         <button className="panel-close" onClick={() => setScreen("menu")} aria-label="Lukk">
           ×
         </button>
-        <p className="sheet-kicker">Statistikk</p>
+        <p className="sheet-kicker">Statistikk · {licence === "A" ? "MC (klasse A)" : "Bil (klasse B)"}</p>
         <div className="stat-summary">
           <div>
             <span className="tb-label">Scenarioer</span>
@@ -80,7 +82,7 @@ export function Stats() {
               setConfirm(false);
             }}
           >
-            {confirm ? "Trykk igjen for å slette all fremgang" : "Nullstill fremgang"}
+            {confirm ? "Trykk igjen for å slette fremgangen for denne klassen" : "Nullstill fremgang"}
           </button>
         </div>
       </section>

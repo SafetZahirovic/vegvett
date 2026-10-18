@@ -22,6 +22,8 @@ export type RoadLayout =
   | { type: "x-kryss"; at: number }
   /** Vegen du kjører på, ender i en gjennomgående veg ved v = at (du må svinge). */
   | { type: "t-ende"; at: number }
+  /** Vegen svinger 90° ved v = at, med kurveradius `radius` (senterlinjen). */
+  | { type: "kurve"; at: number; side: "left" | "right"; radius: number }
   /** Rundkjøring med sentrum i [0, at] og armer i alle fire retninger. */
   | { type: "rundkjoring"; at: number };
 
@@ -42,6 +44,8 @@ export type RoadExtra =
    * `side` sett i spillerens kjøreretning. Krysser eventuelle sideveger.
    */
   | { type: "sykkelveg"; side: "left" | "right"; from?: number; to?: number }
+  /** Kollektivfelt til høyre for kjørefeltet. */
+  | { type: "kollektivfelt"; from: number; to: number }
   /** Smalt vegparti (f.eks. smal bru eller vegarbeid) der bare ett kjøretøy får plass i bredden. */
   | { type: "smalt"; from: number; to: number };
 
@@ -68,7 +72,7 @@ export type Marking = {
   width?: number;
 };
 
-export type VehicleType = "personbil" | "sykkel" | "buss" | "utrykning";
+export type VehicleType = "personbil" | "sykkel" | "buss" | "utrykning" | "motorsykkel";
 
 export type Turn = "straight" | "left" | "right" | "uturn" | "pullout" | "pullover";
 
@@ -113,10 +117,15 @@ export type Animal = {
   route?: Route;
 };
 
+export type Marker = { id: string; name: string; pos: Vec2 };
+
 /** Id for spillerens bil i klikk-/rekkefølgespørsmål og fremheving. */
 export const PLAYER_ID = "player";
 
 export type Decor = { type: "tre" | "hus"; pos: Vec2; size?: number };
+
+/** Førerkortklasse: B = bil, A = motorsykkel. */
+export type Licence = "B" | "A";
 
 export type Topic =
   | "skilt"
@@ -129,7 +138,8 @@ export type Topic =
   | "buss"
   | "fart"
   | "dyr"
-  | "sykkel";
+  | "sykkel"
+  | "motorsykkel";
 
 type QuestionBase = {
   id: string;
@@ -165,6 +175,8 @@ export type Scenario = {
   title: string;
   topic: Topic;
   difficulty: 1 | 2 | 3;
+  /** Hvilke klasser scenarioet gjelder for. Utelatt = både bil og MC. */
+  licences?: Licence[];
   road: RoadLayout;
   centerLine?: CenterLineSegment[];
   roadExtras?: RoadExtra[];
@@ -173,6 +185,8 @@ export type Scenario = {
   vehicles: Vehicle[];
   pedestrians?: Pedestrian[];
   animals?: Animal[];
+  /** Klikkbare punkter på bakken, f.eks. mulige plasseringer i feltet for MC. */
+  markers?: Marker[];
   decor?: Decor[];
   player: { indicator?: "left" | "right"; route?: Route };
   /** Hvilket punkt på bakken kartet sentreres på (standard [0, 17], litt foran bilen). */

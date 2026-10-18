@@ -12,7 +12,7 @@ export function InspectPanel() {
   const scenario = useScenario();
   const hiddenSigns = useHiddenSigns();
   const showAll = useGame((s) => s.showAllRoutes);
-  if (!selected) return null;
+  if (!selected || selected.kind === "marker") return null;
 
   let body: ReactNode = null;
   if (selected.kind === "sign") {

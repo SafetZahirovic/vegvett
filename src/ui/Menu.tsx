@@ -1,22 +1,43 @@
+import type { Licence } from "../scenarios/types";
+import { useProgress, useStats } from "../state/progress";
 import { EXAM_LENGTH, useGame } from "../state/store";
-import { useProgress } from "../state/progress";
 
-/** Startskjerm: velg øving, prøve eller statistikk. */
+const LICENCES: { id: Licence; title: string; sub: string }[] = [
+  { id: "B", title: "Bil", sub: "Klasse B" },
+  { id: "A", title: "MC", sub: "Klasse A" },
+];
+
+/** Startskjerm: velg klasse, og så øving, prøve eller statistikk. */
 export function Menu() {
   const { startPractice, startExam, setScreen } = useGame.getState();
-  const topics = useProgress((s) => s.topics);
-  const played = useProgress((s) => s.scenariosPlayed);
+  const licence = useProgress((s) => s.licence);
+  const setLicence = useProgress((s) => s.setLicence);
+  const { topics, scenariosPlayed: played } = useStats();
   const total = Object.values(topics).reduce((a, t) => a + (t?.total ?? 0), 0);
   const correct = Object.values(topics).reduce((a, t) => a + (t?.correct ?? 0), 0);
 
   return (
     <div className="overlay">
       <section className="sheet menu" aria-label="Meny">
-        <p className="sheet-kicker">Teoriprøven klasse B</p>
+        <p className="sheet-kicker">Teoriprøven</p>
         <h1>VEGVETT</h1>
         <p className="sheet-lead">
           Lær trafikkreglene i en tegning. Utforsk krysset, klikk på skilt og kjøretøy, og svar på spørsmålene.
         </p>
+        <div className="licence-switch" role="radiogroup" aria-label="Førerkortklasse">
+          {LICENCES.map((l) => (
+            <button
+              key={l.id}
+              role="radio"
+              aria-checked={licence === l.id}
+              className={`licence${licence === l.id ? " is-active" : ""}`}
+              onClick={() => setLicence(l.id)}
+            >
+              <span className="licence-title">{l.title}</span>
+              <span className="licence-sub">{l.sub}</span>
+            </button>
+          ))}
+        </div>
         <div className="menu-actions">
           <button className="menu-card" onClick={startPractice} autoFocus>
             <span className="menu-card-title">Øvingsmodus</span>

@@ -1,5 +1,5 @@
 import { SCENARIOS } from "../scenarios";
-import type { Topic } from "../scenarios/types";
+import type { Licence, Scenario, Topic } from "../scenarios/types";
 import { errorRate, type TopicStat } from "./progress";
 
 /** Vekt for temaer som ikke er prøvd ennå (litt over middels, så de kommer tidlig). */
@@ -11,10 +11,14 @@ const ERROR_WEIGHT = 4;
 const FRESH_SHARE = 0.2;
 const MIN_POOL = 4;
 
-/** Scenarioindekser sortert fra minst nylig sett (aldri sett først), tilfeldig ved likhet. */
-function byFreshness(lastSeen: Record<string, number>, random: () => number): number[] {
+/** Gjelder scenarioet for valgt klasse? Uten `licences` gjelder det både bil og MC. */
+export const forLicence = (s: Scenario, licence: Licence) => (s.licences ?? ["A", "B"]).includes(licence);
+
+/** Scenarioindekser for klassen, sortert fra minst nylig sett (aldri sett først), tilfeldig ved likhet. */
+function byFreshness(lastSeen: Record<string, number>, licence: Licence, random: () => number): number[] {
   const tie = new Map(SCENARIOS.map((s) => [s.id, random()]));
-  return SCENARIOS.map((_, i) => i).sort((a, b) => {
+  const pool = SCENARIOS.map((_, i) => i).filter((i) => forLicence(SCENARIOS[i], licence));
+  return pool.sort((a, b) => {
     const da = lastSeen[SCENARIOS[a].id] ?? 0;
     const db = lastSeen[SCENARIOS[b].id] ?? 0;
     return da - db || tie.get(SCENARIOS[a].id)! - tie.get(SCENARIOS[b].id)!;
@@ -30,12 +34,14 @@ export function pickScenario(
   topics: Partial<Record<Topic, TopicStat>>,
   exclude: Set<string>,
   lastSeen: Record<string, number> = {},
+  licence: Licence = "B",
   random = Math.random,
 ): number {
-  const ordered = byFreshness(lastSeen, random).filter((i) => !exclude.has(SCENARIOS[i].id));
-  const poolSize = Math.max(MIN_POOL, Math.ceil(SCENARIOS.length * FRESH_SHARE));
+  const all = byFreshness(lastSeen, licence, random);
+  const ordered = all.filter((i) => !exclude.has(SCENARIOS[i].id));
+  const poolSize = Math.max(MIN_POOL, Math.ceil(all.length * FRESH_SHARE));
   let candidates = ordered.slice(0, poolSize).map((i) => ({ s: SCENARIOS[i], i }));
-  if (candidates.length === 0) candidates = SCENARIOS.map((s, i) => ({ s, i }));
+  if (candidates.length === 0) candidates = all.map((i) => ({ s: SCENARIOS[i], i }));
   const weights = candidates.map(({ s }) => 1 + ERROR_WEIGHT * (errorRate(topics[s.topic]) ?? UNSEEN_ERROR_RATE));
   let r = random() * weights.reduce((a, b) => a + b, 0);
   for (let k = 0; k < candidates.length; k++) {
@@ -46,6 +52,10 @@ export function pickScenario(
 }
 
 /** Rekkefølge for en prøve: scenarioene du har sett minst nylig først, ellers tilfeldig. */
-export function shuffledScenarioOrder(lastSeen: Record<string, number> = {}, random = Math.random): number[] {
-  return byFreshness(lastSeen, random);
+export function shuffledScenarioOrder(
+  lastSeen: Record<string, number> = {},
+  licence: Licence = "B",
+  random = Math.random,
+): number[] {
+  return byFreshness(lastSeen, licence, random);
 }

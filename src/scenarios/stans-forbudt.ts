@@ -8,6 +8,7 @@ export const stansForbudt: Scenario = {
   title: "Stans forbudt",
   topic: "skilt",
   difficulty: 2,
+  licences: ["B"],
   road: { type: "rett" },
   signs: [{ id: "stans", code: "370", pos: [HW + 1.5, 10], facing: "S" }],
   markings: [],

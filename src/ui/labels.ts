@@ -6,6 +6,7 @@ export const VEHICLE_LABEL: Record<VehicleType, string> = {
   sykkel: "Sykkel",
   buss: "Buss",
   utrykning: "Utrykningskjøretøy",
+  motorsykkel: "Motorsykkel",
 };
 export const ANIMAL_LABEL: Record<AnimalType, string> = {
   elg: "Elg",
@@ -27,7 +28,9 @@ export const TURN_LABEL: Record<Turn, string> = {
 
 /** Lesbart navn på et objekt i scenen (brukt i fasit og forklaringer). */
 export function objectName(scenario: Scenario, id: string): string {
-  if (id === PLAYER_ID) return "Du (blå bil)";
+  if (id === PLAYER_ID) return "Du";
+  const m = scenario.markers?.find((x) => x.id === id);
+  if (m) return m.name;
   const v = scenario.vehicles.find((x) => x.id === id);
   if (v) return v.name ?? VEHICLE_LABEL[v.type];
   const p = scenario.pedestrians?.find((x) => x.id === id);
@@ -51,6 +54,7 @@ export const TOPIC_LABEL: Record<Topic, string> = {
   fart: "Fart",
   dyr: "Dyr",
   sykkel: "Sykkel",
+  motorsykkel: "Motorsykkel",
 };
 
 /** Lesbar tekst for et svar (brukt på resultatsiden). */

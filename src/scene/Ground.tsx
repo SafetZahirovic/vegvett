@@ -49,7 +49,7 @@ export function MainRoad({ end = E }: { end?: number }) {
 
 /** Der hovedvegen slutter (T-kryss der du må svinge), ellers undefined. */
 export const mainRoadEnd = (road: RoadLayout): number | undefined =>
-  road.type === "t-ende" ? road.at + HW + SHOULDER : undefined;
+  road.type === "t-ende" ? road.at + HW + SHOULDER : road.type === "kurve" ? road.at : undefined;
 
 const DASH: Record<CenterLineType, [number, number] | null> = {
   midtlinje: [...CENTER_DASH],
@@ -72,6 +72,8 @@ function centerGaps(road: RoadLayout): [number, number][] {
       return [[road.at - HW - 0.5, road.at + HW + 0.5]];
     case "t-ende":
       return [[road.at - HW - 0.5, E]];
+    case "kurve":
+      return [[road.at, E]];
     case "rundkjoring":
       return [[road.at - RB_OUTER - RB_SPLITTER, road.at + RB_OUTER + RB_SPLITTER]];
   }
@@ -195,6 +197,68 @@ function SideRoad({
         strokeWidth={LINE}
         strokeDasharray={CENTER_DASH.join(" ")}
       />
+    </g>
+  );
+}
+
+/**
+ * Sti langs vegen fra kurvens start, med lateral forskyvning d (positiv = til høyre):
+ * en kvartsirkel og så rett ut i ny retning.
+ */
+function curvePath(at: number, side: "left" | "right", radius: number, d: number, start = at - 0.5): string {
+  const k = side === "right" ? 1 : -1;
+  const r = radius - k * d;
+  const cx = k * radius;
+  const endX = cx;
+  const endY = at + r;
+  const farX = k * E;
+  const sweep = side === "right" ? 0 : 1;
+  return `M ${d} ${start} L ${d} ${at} A ${r} ${r} 0 0 ${sweep} ${endX} ${endY} L ${farX} ${endY}`;
+}
+
+/** Vegen svinger 90°: asfalt, kanter og midtlinje tegnes som strøk langs kurven. */
+function Kurve({ at, side, radius }: { at: number; side: "left" | "right"; radius: number }) {
+  const w = HW + SHOULDER;
+  return (
+    <g fill="none">
+      <path d={curvePath(at, side, radius, 0)} className="road-stroke" strokeWidth={w * 2} />
+      <path d={curvePath(at, side, radius, -w)} className="road-edge" />
+      <path d={curvePath(at, side, radius, w)} className="road-edge" />
+      <path d={curvePath(at, side, radius, -HW + 0.175)} className="paint-line" strokeWidth={LINE} />
+      <path d={curvePath(at, side, radius, HW - 0.175)} className="paint-line" strokeWidth={LINE} />
+      <path
+        d={curvePath(at, side, radius, 0, at)}
+        className="center-line"
+        strokeWidth={LINE}
+        strokeDasharray={CENTER_DASH.join(" ")}
+      />
+    </g>
+  );
+}
+
+/** Kollektivfelt til høyre for kjørefeltet, med «BUSS» malt i feltet. */
+function Kollektivfelt({ from, to }: { from: number; to: number }) {
+  const x0 = HW + SHOULDER - 0.3;
+  const x1 = x0 + 3.25;
+  const texts: number[] = [];
+  for (let v = from + 8; v < to - 4; v += 20) texts.push(v);
+  return (
+    <g>
+      <rect x={x0} y={from} width={x1 - x0 + SHOULDER} height={to - from} className="road" />
+      <line x1={x1 + SHOULDER} y1={from} x2={x1 + SHOULDER} y2={to} className="road-edge" />
+      <rect x={x1 - 0.1 - LINE} y={from} width={LINE} height={to - from} className="paint" />
+      {texts.map((v) => (
+        <text
+          key={v}
+          x={(x0 + x1) / 2}
+          y={v}
+          className="lane-text"
+          transform={`rotate(-90 ${(x0 + x1) / 2} ${v}) scale(1 -1)`}
+          style={{ transformBox: "fill-box", transformOrigin: "center" }}
+        >
+          BUSS
+        </text>
+      ))}
     </g>
   );
 }
@@ -387,12 +451,15 @@ export function RoadFeatures({ road, extras = [] }: { road: RoadLayout; extras?:
       )}
       {road.type === "rundkjoring" && <Roundabout at={road.at} />}
       {road.type === "t-ende" && <TEnde at={road.at} />}
+      {road.type === "kurve" && <Kurve at={road.at} side={road.side} radius={road.radius} />}
       {/* Etter kryssene, så gang- og sykkelvegen ligger over sidevegene der den krysser dem */}
       {extras.map((x, i) =>
         x.type === "busslomme" ? (
           <Busslomme key={i} from={x.from} to={x.to} />
         ) : x.type === "smalt" ? (
           <Smalt key={i} from={x.from} to={x.to} />
+        ) : x.type === "kollektivfelt" ? (
+          <Kollektivfelt key={i} from={x.from} to={x.to} />
         ) : (
           <Sykkelveg key={i} side={x.side} from={x.from} to={x.to} />
         ),

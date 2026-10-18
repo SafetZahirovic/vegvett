@@ -1,5 +1,5 @@
 import { EXAM_LENGTH, useExamComplete, useGame, useScenario, useScenarioDone } from "../state/store";
-import { useProgress } from "../state/progress";
+import { useProgress, useStats } from "../state/progress";
 
 export function Hud() {
   const scenario = useScenario();
@@ -7,7 +7,8 @@ export function Hud() {
   const exam = useGame((s) => s.exam);
   const driving = useGame((s) => s.next !== null);
   const showAllRoutes = useGame((s) => s.showAllRoutes);
-  const played = useProgress((s) => s.scenariosPlayed);
+  const played = useStats().scenariosPlayed;
+  const licence = useProgress((s) => s.licence);
   const done = useScenarioDone();
   const examComplete = useExamComplete();
   const { resetView, advance, toggleAllRoutes, setScreen, finishExam } = useGame.getState();
@@ -32,7 +33,9 @@ export function Hud() {
       <footer className="titleblock">
         <div>
           <span className="tb-label">Modus</span>
-          <span className="tb-value">{mode === "prove" ? "Prøve" : "Øving"}</span>
+          <span className="tb-value">
+            {licence === "A" ? "MC" : "Bil"} · {mode === "prove" ? "Prøve" : "Øving"}
+          </span>
         </div>
         <div className="tb-main">
           <span className="tb-label">Scenario</span>

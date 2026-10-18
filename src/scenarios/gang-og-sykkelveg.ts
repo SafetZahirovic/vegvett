@@ -53,7 +53,7 @@ export const gangOgSykkelveg: Scenario = {
     {
       id: "gs-kjore",
       type: "yesno",
-      prompt: "Kan du kjøre bil på gang- og sykkelvegen for å komme raskere forbi?",
+      prompt: "Kan du kjøre motorvogn på gang- og sykkelvegen for å komme raskere forbi?",
       correct: false,
       explanation: "Gang- og sykkelveg er for gående og syklende. Det er ikke lov å kjøre motorvogn der.",
       rule: "Trafikkreglene § 4 nr. 1, skiltforskriften § 12 (skilt 522)",

@@ -161,3 +161,15 @@ export function ringPosition(at: number, angle: number): { pos: Vec2; heading: n
     heading: (Math.atan2(tangent[0], tangent[1]) * 180) / Math.PI,
   };
 }
+
+/** Rute gjennom en vegkurve (RoadLayout «kurve») for kjøretøy i høyre felt. */
+export function curveRoute(at: number, side: "left" | "right", radius: number, end = 40): Route {
+  const half = LANE / 2;
+  const r = side === "right" ? radius - half : radius + half;
+  return drive([half, 0], "N", [["fwd", at], ["turn", side, r], ["fwd", end]]);
+}
+
+/** Tre klikkbare plasseringer på tvers av spillerens felt ved v. */
+export function laneMarkers(v: number, names: [string, string, string], us: [number, number, number] = [0.7, LANE / 2, LANE - 0.7]) {
+  return names.map((name, i) => ({ id: `felt-${i}`, name, pos: [us[i], v] as Vec2 }));
+}

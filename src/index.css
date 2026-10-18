@@ -634,3 +634,26 @@ button.hud-brand:hover { border-color: var(--bp-accent); }
 .menu-links { display: flex; gap: 16px; }
 .btn-submit { margin-top: 14px; width: 100%; }
 .btn-primary:disabled { opacity: 0.35; cursor: default; background: var(--bp-accent); }
+
+/* ---------- Klassevalg ---------- */
+
+.licence-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin-bottom: 14px; background: var(--bp-border); border: 1px solid var(--bp-border); }
+.licence {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px;
+  border: none;
+  background: var(--bp-bg);
+  color: var(--bp-dim);
+  font-family: var(--mono);
+  cursor: pointer;
+}
+.licence-title { font-size: 18px; font-weight: 700; }
+.licence-sub { font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; }
+.licence:hover { color: var(--bp-line); }
+.licence.is-active { background: rgba(90, 209, 255, 0.14); color: var(--bp-accent); box-shadow: inset 0 -3px 0 var(--bp-accent); }
+.poi.is-marker .poi-fill { stroke-dasharray: 4 3; }
+.road-stroke { stroke: var(--bp-road); stroke-linecap: butt; }
+.lane-text { fill: var(--bp-line); font-family: var(--mono); font-weight: 700; font-size: 1.4px; text-anchor: middle; dominant-baseline: middle; opacity: 0.85; }

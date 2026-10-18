@@ -43,7 +43,7 @@ export const tKryssForkjorsveg: Scenario = {
       type: "choice",
       prompt: "Hvem har vikeplikt i dette krysset?",
       options: [
-        { id: "deg", text: "Du (den blå bilen)" },
+        { id: "deg", text: "Du" },
         { id: "gul", text: "Den gule bilen i sidevegen" },
         { id: "begge", text: "Begge må stanse før krysset" },
         { id: "ingen", text: "Ingen – høyreregelen avgjør" },

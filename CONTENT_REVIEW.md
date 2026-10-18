@@ -276,6 +276,61 @@ Hvert scenario kan ha flere spørsmål enn de tre som vises; hvert besøk trekke
 | ☐ | fjellveg / fv-nedover | Lav fart, gjerne motorbrems | VTL § 6 første ledd (kjøreråd) |
 
 
+## MC – klasse A
+
+Klassevalget i menyen bestemmer kjøretøy og hvilke scenarioer som brukes. Scenarioer uten `licences`
+gjelder både bil og MC. `parkering-forbudt` og `stans-forbudt` er bare for bil. MC-scenarioene har id
+som begynner på `mc-`. Fremgangen lagres separat per klasse.
+
+Kilder (sjekket av AI-agent 2026-10-18): verneutstyrforskriften (FOR-1979-09-21-7),
+bruksforskriften (FOR-1990-01-25-92), trafikkreglene, skiltforskriften og Statens vegvesens
+læreplan for klasse A (Håndbok 251, 2014) / «Sikker på MC». Det som kommer fra Statens vegvesens
+veiledning, er merket «veiledning» i appen og er ikke lovtekst.
+
+### Nye veg-/skiltelementer
+- ☐ **Kurve** (`kurve`): vegen svinger 90°.
+- ☐ **Kollektivfelt** til høyre for kjørefeltet, med skilt 508.1.
+- ☐ **Plasseringsmarkører** i feltet (klikkspørsmål).
+
+### Spørsmål
+| Status | Scenario / spørsmål | Riktig svar | Henvisning |
+|---|---|---|---|
+| ☐ | mc-plassering / mcp-hvor (klikk) | Litt til venstre for midten | Vegvesen-læreplan (veiledning) |
+| ☐ | mc-plassering / mcp-lov | Nei – bare «høyre side, godt innenfor feltet» | TR § 5 nr. 1 |
+| ☐ | mc-plassering / mcp-hvorfor | Sikt og synbarhet | Veiledning |
+| ☐ | mc-verneutstyr / mcv-utstyr | Bare hjelm er påbudt | Verneutstyrforskr. § 2 |
+| ☐ | mc-verneutstyr / mcv-passasjer-hjelm | Ja | Verneutstyrforskr. § 2 |
+| ☐ | mc-verneutstyr / mcv-ansvar | Føreren (passasjer under 15) | Verneutstyrforskr. § 3 |
+| ☐ | mc-verneutstyr / mcv-antall | Nei – ikke flere enn registrert | Bruksforskriften § 3-1 |
+| ☐ | mc-verneutstyr / mcv-unntak | Nei – unntak på parkeringsplass o.l. | Verneutstyrforskr. § 2 b ⚠ bokstav |
+| ☐ | mc-lys / mcl-alltid | Ja | TR § 15 nr. 1 |
+| ☐ | mc-lys / mcl-taake | Ja | TR § 15 nr. 5 |
+| ☐ | mc-kollektivfelt / mck-kollektiv | Ja – tohjuls MC uten sidevogn | TR § 5 nr. 2 |
+| ☐ | mc-kollektivfelt / mck-sykkelfelt | Nei | TR § 5 nr. 2 |
+| ☐ | mc-kollektivfelt / mck-fortau | Nei – stans forbudt på fortau | TR § 17 nr. 1 c |
+| ☐ | mc-ko / mck-mellom | Nei – kjøring mellom køer er ikke tillatt | TR § 5 nr. 1, § 12 ⚠ (ikke uttrykkelig nevnt) |
+| ☐ | mc-ko / mck-hoyre | Når alle felt er fulle og farten bestemmes av den foran | TR § 12 nr. 1 c |
+| ☐ | mc-ko / mck-avstand | Unngå påkjøring om den foran bremser | TR § 5 nr. 3 |
+| ☐ | mc-forbikjoringsforbud / mcf-du | Nei – bil har mer enn to hjul | SF § 8 (334) |
+| ☐ | mc-forbikjoringsforbud / mcf-bilen | Ja – MC har to hjul | SF § 8 (334) |
+| ☐ | mc-motende-venstresving / mcm-handling | Senk farten, vær klar – ikke regn med å bli sett | Veiledning, VTL § 3 |
+| ☐ | mc-motende-venstresving / mcm-vikeplikt | Ja | TR § 7 nr. 2 annet punktum |
+| ☐ | mc-motende-venstresving / mcm-hvorfor | MC er liten, fart/avstand vanskelig å bedømme | Veiledning |
+| ☐ | mc-sideveg / mcs-handling | Regn med at den kan kjøre ut, ha en utvei | Veiledning |
+| ☐ | mc-sideveg / mcs-vikeplikt | Ja | SF § 6 |
+| ☐ | mc-hoyresving / mch-start (klikk) | Venstre del av feltet | Veiledning |
+| ☐ | mc-hoyresving / mch-blikk | Dit du vil kjøre | Veiledning |
+| ☐ | mc-hoyresving / mch-fart | Før svingen | Veiledning, VTL § 6 |
+| ☐ | mc-venstresving / mcv-start (klikk) | Inntil kantlinjen | Veiledning |
+| ☐ | mc-venstresving / mcv-midtlinje | Nei | Veiledning ⚠ begrunnelsen om lening er egen formulering |
+| ☐ | mc-gruppe / mcg-rad | God avstand, ikke press | Veiledning |
+| ☐ | mc-gruppe / mcg-regel | Unngå påkjøring, plass til innkjøring | TR § 5 nr. 3 |
+| ☐ | mc-gruppe / mcg-brems | Begge bremsene | Veiledning |
+| ☐ | mc-grus-tilhenger / mcgt-grus | Senk farten før svingen | Veiledning ⚠ «unngå brå bremsing/styring» er egen formulering |
+| ☐ | mc-grus-tilhenger / mcgt-tilhenger-fart | 80 km/t | TR § 13 nr. 4 |
+| ☐ | mc-grus-tilhenger / mcgt-a1 | Nei – krever over 125 cm³ | Bruksforskriften § 4-2 nr. 1 |
+
+
 ## Ikke dekket ennå
 - Feltvalg i tofelts rundkjøring (krever at to felt i ringen kan tegnes).
 - Trikk som kjøretøytype.

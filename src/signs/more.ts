@@ -440,6 +440,13 @@ export const moreSigns: SignDef[] = [
     "Skiltforskriften § 12 (skilt 503), trafikkreglene § 4 nr. 2",
   ),
   info(
+    "508.1",
+    "Kollektivfelt for buss",
+    (ctx) => text(ctx, "BUSS", 0, -0.02, 120, C.white),
+    "Feltet er reservert for buss. Blant annet tohjuls motorsykkel uten sidevogn og utrykningskjøretøy kan også bruke det, med mindre skilt sier noe annet.",
+    "Skiltforskriften § 12 (skilt 508), trafikkreglene § 5 nr. 2",
+  ),
+  info(
     "518",
     "Gangveg",
     (ctx) => tinted(ctx, centered(pictograms.gangfelt), C.white),

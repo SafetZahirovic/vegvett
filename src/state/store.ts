@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { create } from "zustand";
 import { SCENARIOS } from "../scenarios";
-import type { Question, Scenario } from "../scenarios/types";
+import type { Licence, Question, Scenario } from "../scenarios/types";
 import { START_POSE, planTravel, type Pose, type Travel } from "../scene/pose";
 import { useProgress } from "./progress";
 import { pickScenario, shuffledScenarioOrder } from "./selection";
@@ -11,8 +11,8 @@ export type Screen = "menu" | "play" | "result" | "stats" | "signs";
 
 /** Antall spørsmål i en prøve. */
 export const EXAM_LENGTH = 20;
-/** Scenarioet nye spillere starter med. */
-const FIRST_SCENARIO_ID = "landevei-80";
+/** Scenarioet nye spillere starter med, per klasse. */
+const FIRST_SCENARIO_ID: Record<Licence, string> = { B: "landevei-80", A: "mc-plassering" };
 /** Så mange spørsmål stilles per besøk i et scenario. Har scenarioet flere, trekkes de tilfeldig. */
 export const QUESTIONS_PER_VISIT = 3;
 
@@ -41,7 +41,7 @@ type Exam = {
   log: ExamEntry[];
 };
 
-export type SelectionKind = "sign" | "vehicle" | "pedestrian" | "animal";
+export type SelectionKind = "sign" | "vehicle" | "pedestrian" | "animal" | "marker";
 export type Selection = { kind: SelectionKind; id: string } | null;
 
 export type AnswerValue = string | boolean;
@@ -216,8 +216,8 @@ export const useGame = create<GameState>((set, get) => ({
       target = exam.order[exam.pos + 1];
       set({ exam: { ...exam, pos: exam.pos + 1 } });
     } else {
-      const { topics, lastSeen } = useProgress.getState();
-      target = pickScenario(topics, new Set([current, ...recent]), lastSeen);
+      const { stats, licence, lastSeen } = useProgress.getState();
+      target = pickScenario(stats[licence].topics, new Set([current, ...recent]), lastSeen, licence);
     }
     set({
       next: target,
@@ -230,16 +230,19 @@ export const useGame = create<GameState>((set, get) => ({
     });
   },
   startPractice: () => {
-    const { topics, scenariosPlayed, lastSeen, markSeen } = useProgress.getState();
-    // Første gang: begynn med den rolige landeveien.
-    const first = Math.max(0, SCENARIOS.findIndex((s) => s.id === FIRST_SCENARIO_ID));
-    const index = scenariosPlayed === 0 ? first : pickScenario(topics, new Set(), lastSeen);
+    const { stats, licence, lastSeen, markSeen } = useProgress.getState();
+    const { topics, scenariosPlayed } = stats[licence];
+    // Første gang: begynn med et rolig scenario for klassen.
+    const firstId = FIRST_SCENARIO_ID[licence];
+    const firstIndex = SCENARIOS.findIndex((s) => s.id === firstId);
+    const index =
+      scenariosPlayed === 0 && firstIndex >= 0 ? firstIndex : pickScenario(topics, new Set(), lastSeen, licence);
     markSeen(SCENARIOS[index].id);
     set({ ...freshScenario(), qids: pickQuestionIds(SCENARIOS[index]), mode: "ovelse", screen: "play", exam: null, index, next: null, recent: [], pose: START_POSE, travel: null });
   },
   startExam: () => {
-    const { lastSeen, markSeen } = useProgress.getState();
-    const order = shuffledScenarioOrder(lastSeen);
+    const { lastSeen, markSeen, licence } = useProgress.getState();
+    const order = shuffledScenarioOrder(lastSeen, licence);
     markSeen(SCENARIOS[order[0]].id);
     set({
       ...freshScenario(),

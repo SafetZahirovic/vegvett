@@ -25,7 +25,7 @@ export type RoadLayout =
   /** Vegen svinger 90° ved v = at, med kurveradius `radius` (senterlinjen). */
   | { type: "kurve"; at: number; side: "left" | "right"; radius: number }
   /** Rundkjøring med sentrum i [0, at] og armer i alle fire retninger. */
-  | { type: "rundkjoring"; at: number };
+  | { type: "rundkjoring"; at: number; lanes?: 1 | 2 };
 
 /** Midtlinje på hovedvegen. Standard er vanlig stiplet midtlinje. */
 export type CenterLineType = "midtlinje" | "varsellinje" | "sperrelinje" | "midtdeler";
@@ -48,6 +48,10 @@ export type RoadExtra =
   | { type: "trikkeskinner"; from?: number; to?: number }
   /** Jernbane som krysser vegen ved v = at (planovergang), eventuelt med bom. */
   | { type: "jernbane"; at: number; bom?: boolean }
+  /** Et ekstra kjørefelt i samme retning, til høyre for spillerens felt (f.eks. inn mot rundkjøring). */
+  | { type: "ekstrafelt"; from: number; to: number }
+  /** Sambruksfelt til høyre for kjørefeltet (skilt 509). `persons` er minste antall personer i bilen. */
+  | { type: "sambruksfelt"; from: number; to: number; persons: number }
   /** Kollektivfelt til høyre for kjørefeltet. */
   | { type: "kollektivfelt"; from: number; to: number }
   /** Smalt vegparti (f.eks. smal bru eller vegarbeid) der bare ett kjøretøy får plass i bredden. */
@@ -123,6 +127,18 @@ export type Animal = {
 
 export type Marker = { id: string; name: string; pos: Vec2 };
 
+/** Lyssignal: rødt, gult, grønt, rødt+gult eller gult blink. */
+export type SignalState = "rod" | "gul" | "gronn" | "rodgul" | "gulblink";
+
+export type TrafficLight = {
+  id: string;
+  /** Stolpens fotpunkt. */
+  pos: Vec2;
+  /** Retningen lysene vender mot (mot trafikken signalet gjelder for). */
+  facing: Dir;
+  state: SignalState;
+};
+
 /** Id for spillerens bil i klikk-/rekkefølgespørsmål og fremheving. */
 export const PLAYER_ID = "player";
 
@@ -193,6 +209,8 @@ export type Scenario = {
   vehicles: Vehicle[];
   pedestrians?: Pedestrian[];
   animals?: Animal[];
+  /** Trafikklys (lyssignal). */
+  lights?: TrafficLight[];
   /** Klikkbare punkter på bakken, f.eks. mulige plasseringer i feltet for MC. */
   markers?: Marker[];
   decor?: Decor[];

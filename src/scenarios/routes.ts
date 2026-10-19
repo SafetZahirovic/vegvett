@@ -126,22 +126,27 @@ export function roundaboutRoute(opts: {
   start?: number;
   ringAngle?: number;
   end?: number;
+  /** Radius på kjørelinjen i ringen (indre/ytre felt i tofelts rundkjøring). */
+  driveRadius?: number;
+  /** Ytterradius på rundkjøringen. */
+  outer?: number;
 }): Route {
-  const { at, exit, from, start = 30, ringAngle, end = 30 } = opts;
-  const delta = (Math.asin(LANE / 2 / RB_DRIVE) * 180) / Math.PI;
+  const { at, exit, from, start = 30, ringAngle, end = 30, driveRadius = RB_DRIVE, outer = RB_OUTER } = opts;
+  const RB_DRIVE_ = driveRadius;
+  const delta = (Math.asin(LANE / 2 / RB_DRIVE_) * 180) / Math.PI;
   const points: Vec2[] = [];
   let a0: number;
   if (from) {
-    points.push(armLane(from, start, at, true), armLane(from, RB_OUTER + 1, at, true));
+    points.push(armLane(from, start, at, true), armLane(from, outer + 1, at, true));
     a0 = ARM_ANGLE[from] + delta;
   } else {
     a0 = ringAngle ?? 0;
   }
   let a1 = ARM_ANGLE[exit] - delta;
   while (a1 <= a0 + 5) a1 += 360;
-  for (let a = a0; a < a1; a += 10) points.push([RB_DRIVE * Math.cos(rad(a)), at + RB_DRIVE * Math.sin(rad(a))]);
-  points.push([RB_DRIVE * Math.cos(rad(a1)), at + RB_DRIVE * Math.sin(rad(a1))]);
-  points.push(armLane(exit, RB_OUTER + 1, at, false), armLane(exit, RB_OUTER + end, at, false));
+  for (let a = a0; a < a1; a += 10) points.push([RB_DRIVE_ * Math.cos(rad(a)), at + RB_DRIVE_ * Math.sin(rad(a))]);
+  points.push([RB_DRIVE_ * Math.cos(rad(a1)), at + RB_DRIVE_ * Math.sin(rad(a1))]);
+  points.push(armLane(exit, outer + 1, at, false), armLane(exit, outer + end, at, false));
 
   // Kjøretøy som allerede er i ringen, svinger til høyre ut av rundkjøringen.
   let turn: Turn = "right";
@@ -153,11 +158,11 @@ export function roundaboutRoute(opts: {
 }
 
 /** Posisjon og kjøreretning for et kjøretøy inne i rundkjøringen (vinkel i grader, 0 = øst). */
-export function ringPosition(at: number, angle: number): { pos: Vec2; heading: number } {
+export function ringPosition(at: number, angle: number, radius = RB_DRIVE): { pos: Vec2; heading: number } {
   const a = rad(angle);
   const tangent: Vec2 = [-Math.sin(a), Math.cos(a)];
   return {
-    pos: [RB_DRIVE * Math.cos(a), at + RB_DRIVE * Math.sin(a)],
+    pos: [radius * Math.cos(a), at + radius * Math.sin(a)],
     heading: (Math.atan2(tangent[0], tangent[1]) * 180) / Math.PI,
   };
 }

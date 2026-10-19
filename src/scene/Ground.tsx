@@ -1,6 +1,6 @@
 import type { CenterLineType, Dir, Marking, RoadExtra, RoadLayout, Scenario, Vec2 } from "../scenarios/types";
 import { DIR } from "./iso";
-import { CENTER_DASH, CYCLE_GAP, CYCLE_WIDTH, HW, RB_INNER, RB_OUTER, RB_SPLITTER, ROAD_EXTENT as E } from "./road";
+import { CENTER_DASH, CYCLE_GAP, CYCLE_WIDTH, HW, RB2_DIVIDER, RB_INNER, RB_SPLITTER, ROAD_EXTENT as E, rbOuter } from "./road";
 
 /**
  * Alt som ligger flatt på bakken tegnes i [u, v]-meter inne i en gruppe med
@@ -75,7 +75,7 @@ function centerGaps(road: RoadLayout): [number, number][] {
     case "kurve":
       return [[road.at, E]];
     case "rundkjoring":
-      return [[road.at - RB_OUTER - RB_SPLITTER, road.at + RB_OUTER + RB_SPLITTER]];
+      return [[road.at - rbOuter(road.lanes) - RB_SPLITTER, road.at + rbOuter(road.lanes) + RB_SPLITTER]];
   }
 }
 
@@ -277,6 +277,43 @@ function Jernbane({ at, bom }: { at: number; bom?: boolean }) {
   );
 }
 
+/** Ekstra kjørefelt til høyre, skilt fra spillerens felt med en stiplet kjørefeltlinje. */
+function Ekstrafelt({ from, to, label }: { from: number; to: number; label?: string }) {
+  const x0 = HW + SHOULDER - 0.3;
+  const x1 = x0 + 3.25;
+  const texts: number[] = [];
+  if (label) for (let v = from + 8; v < to - 4; v += 20) texts.push(v);
+  return (
+    <g>
+      <rect x={HW - 0.4} y={from} width={x1 - HW + 0.4 + SHOULDER} height={to - from} className="road" />
+      <line x1={x1 + SHOULDER} y1={from} x2={x1 + SHOULDER} y2={to} className="road-edge" />
+      <rect x={x1 - 0.1 - LINE} y={from} width={LINE} height={to - from} className="paint" />
+      {/* Kjørefeltlinje (hvit, stiplet) der kantlinjen var */}
+      <line
+        x1={HW - 0.175}
+        y1={from}
+        x2={HW - 0.175}
+        y2={to}
+        className="paint-line"
+        strokeWidth={LINE}
+        strokeDasharray="3 9"
+      />
+      {texts.map((v) => (
+        <text
+          key={v}
+          x={(x0 + x1) / 2}
+          y={v}
+          className="lane-text"
+          transform={`rotate(-90 ${(x0 + x1) / 2} ${v}) scale(1 -1)`}
+          style={{ transformBox: "fill-box", transformOrigin: "center" }}
+        >
+          {label}
+        </text>
+      ))}
+    </g>
+  );
+}
+
 /** Kollektivfelt til høyre for kjørefeltet, med «BUSS» malt i feltet. */
 function Kollektivfelt({ from, to }: { from: number; to: number }) {
   const x0 = HW + SHOULDER - 0.3;
@@ -344,7 +381,8 @@ function ringWithOpenings(r: number, cy: number, halfOpening: number): string {
   return parts.join(" ");
 }
 
-function Roundabout({ at }: { at: number }) {
+function Roundabout({ at, lanes }: { at: number; lanes?: 1 | 2 }) {
+  const RB_OUTER = rbOuter(lanes);
   const w = HW + SHOULDER;
   const opening = (r: number) => (Math.asin(Math.min(1, w / r)) * 180) / Math.PI;
   const splitters = ARMS.map((deg) => {
@@ -369,6 +407,10 @@ function Roundabout({ at }: { at: number }) {
         fill="none"
       />
       {/* Midtøya */}
+      {/* Skillelinje mellom indre og ytre felt i ringen */}
+      {lanes === 2 && (
+        <circle cx={0} cy={at} r={RB2_DIVIDER} className="paint-line" strokeWidth={LINE} strokeDasharray="3 3" fill="none" />
+      )}
       <circle cx={0} cy={at} r={RB_INNER + 0.3} className="paint-line" strokeWidth={LINE} fill="none" />
       <circle cx={0} cy={at} r={RB_INNER} className="island" />
       <circle cx={0} cy={at} r={RB_INNER * 0.55} className="island-inner" />
@@ -490,7 +532,7 @@ export function RoadFeatures({ road, extras = [] }: { road: RoadLayout; extras?:
           <SideRoad at={road.at} side={-1} />
         </>
       )}
-      {road.type === "rundkjoring" && <Roundabout at={road.at} />}
+      {road.type === "rundkjoring" && <Roundabout at={road.at} lanes={road.lanes} />}
       {road.type === "t-ende" && <TEnde at={road.at} />}
       {road.type === "kurve" && <Kurve at={road.at} side={road.side} radius={road.radius} />}
       {/* Etter kryssene, så gang- og sykkelvegen ligger over sidevegene der den krysser dem */}
@@ -501,6 +543,10 @@ export function RoadFeatures({ road, extras = [] }: { road: RoadLayout; extras?:
           <Smalt key={i} from={x.from} to={x.to} />
         ) : x.type === "kollektivfelt" ? (
           <Kollektivfelt key={i} from={x.from} to={x.to} />
+        ) : x.type === "ekstrafelt" ? (
+          <Ekstrafelt key={i} from={x.from} to={x.to} />
+        ) : x.type === "sambruksfelt" ? (
+          <Ekstrafelt key={i} from={x.from} to={x.to} label={`${x.persons}+`} />
         ) : x.type === "trikkeskinner" ? (
           <Trikkeskinner key={i} from={x.from} to={x.to} />
         ) : x.type === "jernbane" ? (

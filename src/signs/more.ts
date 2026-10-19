@@ -449,6 +449,13 @@ export const moreSigns: SignDef[] = [
     "Skiltforskriften § 12 (skilt 508), trafikkreglene § 5 nr. 2",
   ),
   info(
+    "509",
+    "Sambruksfelt",
+    (ctx) => text(ctx, "2+", 0, -0.02, 200, C.white),
+    "Feltet kan brukes av kjøretøy med minst så mange personer som skiltet viser, i tillegg til kjøretøy som har lov i kollektivfelt.",
+    "Skiltforskriften § 12 (skilt 509), trafikkreglene § 5 nr. 2",
+  ),
+  info(
     "518",
     "Gangveg",
     (ctx) => tinted(ctx, centered(pictograms.gangfelt), C.white),

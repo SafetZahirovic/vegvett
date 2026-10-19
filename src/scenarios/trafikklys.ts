@@ -57,7 +57,7 @@ export const trafikklys: Scenario = {
       correct: "stans",
       explanation:
         "Gult lys alene varsler at det straks blir rødt, og at du skal stanse. Du kan bare kjøre videre hvis du er så nær at du ikke kan stanse på en trygg måte.",
-      rule: "Skiltforskriften § 24 A (signal 1080)",
+      rule: "Skiltforskriften § 24 (signal 1080)",
       highlight: ["lys-skilt"],
     },
     {
@@ -72,7 +72,7 @@ export const trafikklys: Scenario = {
       ],
       correct: "gront",
       explanation: "Rødt og gult lys samtidig betyr at grønt lys kommer straks. Du skal fortsatt vente.",
-      rule: "Skiltforskriften § 24 A",
+      rule: "Skiltforskriften § 24 (signal 1080)",
       highlight: ["lys-skilt"],
     },
     {
@@ -87,7 +87,7 @@ export const trafikklys: Scenario = {
       ],
       correct: "forsiktig",
       explanation: "Blinkende gult lys betyr at du skal være særlig forsiktig. Vanlige vikepliktregler og skilt gjelder.",
-      rule: "Skiltforskriften § 24 B (signal 1098)",
+      rule: "Skiltforskriften § 24 (signal 1098)",
       highlight: ["lys-skilt"],
     },
   ],

@@ -17,3 +17,10 @@ export const RB_SPLITTER = 7;
 /** Gang- og sykkelveg: avstand fra kjørebanens kant og bredde. */
 export const CYCLE_GAP = 2.5;
 export const CYCLE_WIDTH = 3;
+/** Rundkjøring med to felt i ringen: større ytterradius, og kjørelinjer i indre og ytre felt. */
+export const RB2_OUTER = 17;
+export const RB2_DIVIDER = 11.6;
+export const RB2_DRIVE_INNER = 9.1;
+export const RB2_DRIVE_OUTER = 14.2;
+/** Ytterradius for en rundkjøring med 1 eller 2 felt. */
+export const rbOuter = (lanes?: 1 | 2) => (lanes === 2 ? RB2_OUTER : RB_OUTER);

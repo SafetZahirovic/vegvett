@@ -49,7 +49,7 @@ type Exam = {
   timedOut?: boolean;
 };
 
-export type SelectionKind = "sign" | "vehicle" | "pedestrian" | "animal" | "marker";
+export type SelectionKind = "sign" | "vehicle" | "pedestrian" | "animal" | "marker" | "signal";
 export type Selection = { kind: SelectionKind; id: string } | null;
 
 export type AnswerValue = string | boolean;

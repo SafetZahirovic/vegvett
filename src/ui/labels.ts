@@ -1,4 +1,4 @@
-import { PLAYER_ID, type AnimalType, type Question, type Scenario, type Topic, type Turn, type VehicleType } from "../scenarios/types";
+import { PLAYER_ID, type SignalState, type AnimalType, type Question, type Scenario, type Topic, type Turn, type VehicleType } from "../scenarios/types";
 import { signTitle } from "../signs/registry";
 
 export const VEHICLE_LABEL: Record<VehicleType, string> = {
@@ -30,6 +30,8 @@ export const TURN_LABEL: Record<Turn, string> = {
 /** Lesbart navn på et objekt i scenen (brukt i fasit og forklaringer). */
 export function objectName(scenario: Scenario, id: string): string {
   if (id === PLAYER_ID) return "Du";
+  const l = scenario.lights?.find((x) => x.id === id);
+  if (l) return "Trafikklyset";
   const m = scenario.markers?.find((x) => x.id === id);
   if (m) return m.name;
   const v = scenario.vehicles.find((x) => x.id === id);
@@ -77,3 +79,15 @@ export function answerLabel(scenario: Scenario, q: Question, value: string | boo
     }
   }
 }
+
+/** Hva et lyssignal viser, og hva det betyr for deg. */
+export const SIGNAL_TEXT: Record<SignalState, { label: string; meaning: string }> = {
+  rod: { label: "Rødt", meaning: "Stans ved stopplinjen og vent." },
+  gul: {
+    label: "Gult",
+    meaning: "Det blir straks rødt. Stans, med mindre du er så nær at du ikke kan stanse trygt.",
+  },
+  gronn: { label: "Grønt", meaning: "Du kan kjøre, men følg vikepliktreglene – for eksempel overfor gående når du svinger." },
+  rodgul: { label: "Rødt og gult", meaning: "Grønt kommer straks. Vent til det blir grønt." },
+  gulblink: { label: "Gult blink", meaning: "Vær særlig forsiktig. Skilt og vanlige vikepliktregler gjelder." },
+};

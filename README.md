@@ -11,7 +11,7 @@ og fotgjengere for å se hva de betyr og hvor de skal kjøre. Deretter svarer du
 Svarer du feil, får du en kort forklaring med henvisning til regelen, og det som gjelder, blir
 markert i tegningen.
 
-Spillet har to klasser, bil (B) og MC (A), med til sammen 72 scenarioer og 219 spørsmål (inntil tre trekkes tilfeldig per besøk), bruker Statens vegvesens offisielle skiltbilder, og har en skiltoversikt med alle 329 skiltene. Det dekker blant annet vikeplikt og høyreregelen,
+Spillet har to klasser, bil (B) og MC (A), med til sammen 77 scenarioer og 241 spørsmål (inntil tre trekkes tilfeldig per besøk), bruker Statens vegvesens offisielle skiltbilder, og har en skiltoversikt med alle 329 skiltene. Det dekker blant annet vikeplikt og høyreregelen,
 forkjørsveg, stopp, rundkjøring, gangfelt, gang- og sykkelveg, buss ved holdeplass, utrykningskjøretøy,
 sperre- og varsellinje, forbikjøring, møteplikt, vegarbeid, motorveg, parkering og stans, fartsgrenser,
 fareskilt og dyr i vegen (elg, rein og sau). Mellom scenarioene kjører bilen ruten sin: den svinger i

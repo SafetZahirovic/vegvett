@@ -692,3 +692,12 @@ button.hud-brand:hover { border-color: var(--bp-accent); }
 .rail { stroke: #9fb3c8; stroke-width: 0.09; }
 .sleeper { fill: #5b4a3a; opacity: 0.6; }
 .barrier { stroke: #ff6b6b; stroke-width: 0.25; stroke-dasharray: 0.6 0.6; }
+
+/* ---------- Trafikklys ---------- */
+.signal { cursor: pointer; }
+.signal-box { fill: #111a24; stroke: var(--bp-line); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.signal.is-hovered .signal-box { stroke-width: 2; }
+.signal.is-selected .signal-box, .signal.is-highlighted .signal-box { stroke: var(--bp-amber); stroke-width: 2.4; }
+.signal.is-highlighted { filter: drop-shadow(0 0 6px rgba(255, 201, 74, 0.85)); }
+.lamp-on { filter: drop-shadow(0 0 0.25px currentColor); }
+.lamp-blink { animation: blink 1s steps(1) infinite; }

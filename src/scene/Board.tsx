@@ -14,7 +14,16 @@ import { useProgress } from "../state/progress";
 import { useGame, type SelectionKind } from "../state/store";
 import { CENTER_LINE_ID, PLAYER_ID, type Route } from "../scenarios/types";
 import { isSceneQuestion, useCurrentQuestion } from "../state/store";
-import { AnimalFigure, CarFigure, DecorFigure, PedestrianFigure, SignFigure, animalTopHeight, vehicleTopHeight } from "./Figures";
+import {
+  AnimalFigure,
+  CarFigure,
+  DecorFigure,
+  PedestrianFigure,
+  SignFigure,
+  TrafficLightFigure,
+  animalTopHeight,
+  vehicleTopHeight,
+} from "./Figures";
 import { RouteArrow } from "./RouteArrow";
 import { CenterLine, Grid, MainRoad, Markings, RoadFeatures, mainRoadEnd } from "./Ground";
 import { DIR, GROUND_MATRIX, P, depth } from "./iso";
@@ -35,7 +44,14 @@ const DEFAULT_COLOR = "#ffd166";
 const PED_COLOR = "#f4a7ff";
 const ANIMAL_COLOR = "#d9a066";
 
-const POI_RADIUS: Record<SelectionKind, number> = { sign: 1.5, vehicle: 3.4, pedestrian: 1.2, animal: 2.4, marker: 0.9 };
+const POI_RADIUS: Record<SelectionKind, number> = {
+  sign: 1.5,
+  vehicle: 3.4,
+  pedestrian: 1.2,
+  animal: 2.4,
+  marker: 0.9,
+  signal: 1.5,
+};
 
 /** Kjører overgangen: oppdaterer fremdrift hver frame til bilen har kjørt ferdig. */
 function useConveyor() {
@@ -260,6 +276,8 @@ function focusPoints(scenario: Scenario, frame: Frame, ids: string[]): Vec2[] {
     if (id === PLAYER_ID) at([PLAYER_U, 0], 0.8);
     const sign = scenario.signs.find((s) => s.id === id);
     if (sign) at(sign.pos, 2.5);
+    const light = scenario.lights?.find((l) => l.id === id);
+    if (light) at(light.pos, 3);
     const veh = scenario.vehicles.find((v) => v.id === id);
     if (veh) at(veh.pos, 0.8);
     const ped = scenario.pedestrians?.find((p) => p.id === id);
@@ -379,6 +397,21 @@ export function Board() {
           forceFront={sign.facing === "S"}
           {...it}
         />);
+    }
+    for (const light of sc.lights ?? []) {
+      const pos = frame.map(light.pos);
+      const it = active ? interactive("signal", light.id) : INACTIVE;
+      add(
+        light.id,
+        pos,
+        <TrafficLightFigure
+          light={light}
+          pos={pos}
+          normal={frame.dir(DIR[light.facing])}
+          forceFront={light.facing === "S"}
+          {...it}
+        />,
+      );
     }
     for (const veh of sc.vehicles) {
       const pos = frame.map(veh.pos);
@@ -508,6 +541,7 @@ export function Board() {
                 <g className="pois">
                   {[
                     ...sc.signs.map((s) => ({ kind: "sign" as const, id: s.id, pos: s.pos })),
+                    ...(sc.lights ?? []).map((l) => ({ kind: "signal" as const, id: l.id, pos: l.pos })),
                     ...sc.vehicles.map((v) => ({
                       kind: "vehicle" as const,
                       id: v.id,

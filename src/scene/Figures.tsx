@@ -1,5 +1,5 @@
 import { useId, type CSSProperties, type SVGProps } from "react";
-import type { Animal, AnimalType, Decor, Heading, Pedestrian, SignPlacement, Vec2, VehicleType } from "../scenarios/types";
+import type { Animal, AnimalType, Decor, Heading, Pedestrian, SignPlacement, TrafficLight, Vec2, VehicleType } from "../scenarios/types";
 import { getSign } from "../signs/registry";
 import { shapePoints } from "../signs/shapes";
 import { signImage } from "../signs/official";
@@ -334,6 +334,71 @@ export function AnimalFigure({
         <polygon key={i} points={face.points} className={`car-${face.kind}`} />
       ))}
       {antlers.flatMap((a, i) => a.split("|").map((p, j) => <polyline key={`${i}${j}`} points={p} className="antler" />))}
+    </g>
+  );
+}
+
+/** Hvilke lamper som lyser for hver tilstand (rød, gul, grønn). */
+const LAMPS: Record<TrafficLight["state"], [boolean, boolean, boolean]> = {
+  rod: [true, false, false],
+  gul: [false, true, false],
+  gronn: [false, false, true],
+  rodgul: [true, true, false],
+  gulblink: [false, true, false],
+};
+
+/** Trafikklys på stolpe. Boksen står i samme plan som et skilt og vender mot trafikken det gjelder for. */
+export function TrafficLightFigure({
+  light,
+  pos,
+  normal,
+  forceFront = false,
+  selected,
+  hovered,
+  highlighted,
+  handlers,
+}: {
+  light: TrafficLight;
+  pos: Vec2;
+  normal: Vec2;
+  forceFront?: boolean;
+  selected: boolean;
+  hovered: boolean;
+  highlighted: boolean;
+  handlers?: Handlers;
+}) {
+  const facing = facesViewer(normal);
+  const front = facing || forceFront;
+  const k = facing ? 1 : -1;
+  const r = rightOf([-normal[0] * k, -normal[1] * k]);
+  const [rx, ry] = P(r[0], r[1]);
+  const w = 0.9;
+  const h = 2.4;
+  const top = 4.6;
+  const [cx, cy] = P(pos[0], pos[1], top - h / 2);
+  const [bx, by] = P(pos[0], pos[1], 0);
+  const lit = LAMPS[light.state];
+  const colors = ["#ff4d4d", "#ffc94a", "#43d17a"];
+  return (
+    <g
+      className={`fig signal${selected ? " is-selected" : ""}${hovered ? " is-hovered" : ""}${highlighted ? " is-highlighted" : ""}`}
+      {...handlers}
+    >
+      <line x1={bx} y1={by} x2={cx} y2={cy + h / 2} className="post" />
+      <g transform={`matrix(${rx} ${ry} 0 1 ${cx} ${cy})`}>
+        <rect x={-w / 2} y={-h / 2} width={w} height={h} rx={0.12} className="signal-box" />
+        {front &&
+          colors.map((c, i) => (
+            <circle
+              key={c}
+              cx={0}
+              cy={-h / 2 + 0.42 + i * 0.78}
+              r={0.3}
+              fill={lit[i] ? c : "#2a3646"}
+              className={lit[i] && light.state === "gulblink" ? "lamp-blink" : lit[i] ? "lamp-on" : undefined}
+            />
+          ))}
+      </g>
     </g>
   );
 }

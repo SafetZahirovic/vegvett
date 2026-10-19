@@ -427,8 +427,43 @@ Innholdet er skrevet for Vegvett.
 - ☐ Alle læringssider er egne tekster med kildeliste nederst. De må gjennomgås på samme måte som spørsmålene.
 
 
+## Runde 5: lyskryss, tofelts rundkjøring, kollektivfelt og sambruksfelt
+
+Fakta kontrollert av en AI-agent mot Lovdata (trafikkreglene, skiltforskriften) og Statens vegvesen
+(2026-10-19). Lyssignalene står i skiltforskriften § 24 (hovedsignal 1080, pil 1082, gult blink 1098);
+tidligere henvisninger til «§ 24 A/B» er rettet.
+
+### Nye veg- og objekttyper
+- ☐ Trafikklys (`lights`) med tilstandene rødt, gult, grønt, rødt+gult og gult blink. Klikk viser hva lyset betyr.
+- ☐ Tofelts rundkjøring (`lanes: 2`) med stiplet feltlinje i ringen, og ekstra felt inn mot rundkjøringen (`ekstrafelt`).
+- ☐ Sambruksfelt (`sambruksfelt`, merket «2+») og skilt 509 Sambruksfelt.
+
+### Lyskryss (`lyskryss.ts`, `lyskryss-venstre.ts`)
+- ☐ Grønt lys: du kan kjøre, men grønt gir ikke forkjørsrett (SF § 24, signal 1080).
+- ☐ Ved sving har du vikeplikt for gående og syklende som går/sykler rett fram (TR § 7 nr. 3).
+- ☐ Ved venstresving har du vikeplikt for møtende, også når begge har grønt (TR § 7 nr. 2).
+- ☐ Ikke høyresving på rødt i Norge (SF § 24, signal 1080).
+- ☐ Ved rødt: stans før stopplinjen, eller før signalet hvis det ikke er stopplinje (SF § 24).
+- ☐ Ikke kjør inn i krysset hvis du blir stående og hindre kryssende trafikk (TR § 5 nr. 4).
+- ☐ Lyssignal går foran skilt og vikepliktregler; når lysene er av eller blinker gult, gjelder skilt og ellers vanlige regler (TR § 3 nr. 1).
+- ☐ Signal med pil gjelder bare retningen pilen viser (SF § 24, signal 1082). Vi påstår ikke at grønn pil betyr konfliktfri sving.
+- ⚠ «Du står midt i krysset og lyset blir gult: fullfør svingen når møtende har stanset.» Bygger på at du har passert
+  signalet og fortsatt har vikeplikt for møtende (TR § 7 nr. 2). Veiledningen er vanlig, men står ikke ordrett i regelverket.
+
+### Tofelts rundkjøring (`rundkjoring-tofelt.ts`)
+- ⚠ Feltvalg: høyre felt til første avkjøring og som regel rett fram, venstre felt til venstre eller lenger rundt.
+  Veiledning fra Statens vegvesen, med grunnlag i TR § 6 nr. 1 og § 5 nr. 1. Ikke en egen lovregel.
+- ☐ Ved feltskifte fra indre til ytre felt for å kjøre ut, viker du for trafikk i feltet du skifter til (TR § 8 nr. 1).
+- ☐ Kjørefeltpiler (oppmerking 1034) viser hvilken retning feltet er for (SF § 22).
+
+### Kollektivfelt og sambruksfelt (`kollektivfelt.ts`, `sambruksfelt.ts`)
+- ☐ Bensin-/dieselbil kan ikke bruke kollektivfelt uten skilt/oppmerking som tillater det (TR § 5 nr. 2).
+- ☐ Elbil kan bruke kollektivfelt, men ikke når underskiltet «Gjelder ikke elmotorvogn» står (TR § 5 nr. 2).
+- ⚠ Buss, drosje, tohjuls MC uten sidevogn, moped og sykkel kan bruke kollektivfelt (TR § 5 nr. 2 / SF skilt 508).
+  Sjekk at drosje er riktig formulert (drosje med taklykt).
+- ☐ Sambruksfelt 509 «2+»: minst to personer i bilen, føreren medregnet. Gjelder til skilt 511 eller første kryss (SF § 8).
+- ☐ Forbudt å stanse i sykkelfelt, kollektivfelt og sambruksfelt (TR § 17 nr. 1 g).
+
 ## Ikke dekket ennå
-- Feltvalg i tofelts rundkjøring (krever at to felt i ringen kan tegnes).
-- Trikk som kjøretøytype.
-- Kollektivfelt (508) og sambruksfelt (509), som krever flere felt.
-- Lyskryss med fungerende trafikklys i tegningen.
+- Kjøring i lyskryss med egne signaler for kollektivtrafikk (signal 1088) og lysregulert gangfelt (1086).
+- Sykkelvegen tegnes fortsatt over sideveger (utsatt).

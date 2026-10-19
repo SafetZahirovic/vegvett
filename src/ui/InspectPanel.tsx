@@ -3,7 +3,7 @@ import { PLAYER_ID } from "../scenarios/types";
 import { CATEGORY_LABEL, getSign, signTitle } from "../signs/registry";
 import { signImage } from "../signs/official";
 import { useGame, useHiddenSigns, useScenario } from "../state/store";
-import { ANIMAL_LABEL, INDICATOR_LABEL, TURN_LABEL, VEHICLE_LABEL } from "./labels";
+import { ANIMAL_LABEL, INDICATOR_LABEL, SIGNAL_TEXT, TURN_LABEL, VEHICLE_LABEL } from "./labels";
 
 
 export function InspectPanel() {
@@ -44,6 +44,21 @@ export function InspectPanel() {
         </dl>
         <p>{def.explanation}</p>
         <p className="rule-ref">{def.rule}</p>
+      </>
+    );
+  } else if (selected.kind === "signal") {
+    const light = scenario.lights?.find((l) => l.id === selected.id);
+    if (!light) return null;
+    const t = SIGNAL_TEXT[light.state];
+    body = (
+      <>
+        <h2>Trafikklys</h2>
+        <dl className="inspect-meta">
+          <dt>Viser</dt>
+          <dd>{t.label}</dd>
+        </dl>
+        <p>{t.meaning}</p>
+        <p className="rule-ref">Skiltforskriften § 24</p>
       </>
     );
   } else if (selected.kind === "animal") {

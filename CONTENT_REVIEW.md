@@ -464,6 +464,42 @@ tidligere henvisninger til «§ 24 A/B» er rettet.
 - ☐ Sambruksfelt 509 «2+»: minst to personer i bilen, føreren medregnet. Gjelder til skilt 511 eller første kryss (SF § 8).
 - ☐ Forbudt å stanse i sykkelfelt, kollektivfelt og sambruksfelt (TR § 17 nr. 1 g).
 
+## Runde 6: tynne undertemaer
+
+Nye kunnskapsspørsmål til undertemaer som hadde få spørsmål. Temaene er valgt ut fra en sammenligning med en
+temaliste. Spørsmålene er skrevet for Vegvett og kontrollert av en AI-agent mot Lovdata og Statens vegvesen
+(2026-10-19). Ingen tekst er hentet fra kommersielle øvingssider.
+
+### Grunnregel, forelegg og beslag (`k-reaksjoner.ts`)
+- ☐ Grunnregelen: hensynsfull, aktpågivende og varsom (vtl § 3).
+- ⚠ Hva går foran hva: politiets tegn går foran alt; lyssignal, skilt og oppmerking går foran trafikkreglene;
+  lyssignal går foran vikeplikt gitt ved skilt (TR § 3 nr. 1 og 2). Svaralternativet er en forenkling.
+- ⚠ Du må ikke vedta et forenklet forelegg (strpl § 256). Paragrafen er ikke bekreftet på Lovdata.
+- ☐ Politiet kan ta førerkortet i beslag ved skjellig grunn til mistanke om forhold som kan gi tap av førerett (vtl § 33 nr. 3).
+- ☐ Skade bare på ting, eieren ikke til stede: varsle eieren eller politiet snarest mulig (vtl § 12 første ledd).
+- ☐ De innblandede skal oppgi navn og adresse til hverandre; føreren også eierens navn og adresse og kjennemerket (vtl § 12).
+- ⚠ Trafikkforsikringen dekker ikke skade på egen bil, men kasko gjør det (bilansvarslova §§ 4, 5 og 15).
+  Unntaket i § 5 er funnet via sekundærkilder.
+
+### Vognkort, vekt og varsellamper (`k-kjoretoy.ts`)
+- ☐ Vognkortet viser egenvekt, tillatt totalvekt og tilhengervekt (bruksforskriften § 5-1).
+- ⚠ Nyttelast = tillatt totalvekt − egenvekt − 75 kg fører (kjøretøyforskriften § 2-6). Nyere vognkort regner ofte
+  føreren med i egenvekten (NAF), så svaralternativet er holdt generelt.
+- ⚠ Blå lampe = fjernlys, gul = feil som må sjekkes. ISO-/produsentkonvensjon, ikke lov.
+- ☐ Første EU-kontroll senest 4 år etter første registrering, deretter hvert 2. år (forskrift om periodisk kontroll § 5 annet ledd).
+- ☐ Føreren skal sørge for at kjøretøyet er i forsvarlig stand (vtl § 23 første ledd).
+
+### Syn, mørke og mikrosøvn (`k-syn.ts`)
+- ⚠ Kode 01 = briller eller kontaktlinser (førerkortforskriften vedlegg 4). Teksten for kode 01 er ikke sett på Lovdata.
+- ⚠ Refleks, blending (se mot høyre vegkant), mikrosøvn, vindu/musikk og smalere synsfelt i høy fart er råd fra
+  Statens vegvesen og Trygg Trafikk. Kjøring når du er for trøtt er forbudt (vtl § 21). Blending: TR § 13 nr. 1.
+
+### Linjer, piler og sperreområder (`k-oppmerking.ts`)
+- ☐ Heltrukken linje mellom felt i samme retning er sperrelinje og skal ikke krysses (SF § 22, oppmerking 1004).
+- ☐ Du må ikke kjøre på sperreområde avgrenset av heltrukken linje (SF § 22, oppmerking 1014).
+- ☐ Piler viser hvilke retninger feltet er for (SF § 22, oppmerking 1034 Piler).
+- ☐ Gul skiller motgående trafikk, hvit ellers (SF § 21).
+
 ## Ikke dekket ennå
 - Kjøring i lyskryss med egne signaler for kollektivtrafikk (signal 1088) og lysregulert gangfelt (1086).
 - Sykkelvegen tegnes fortsatt over sideveger (utsatt).

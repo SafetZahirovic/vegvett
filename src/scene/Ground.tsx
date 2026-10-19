@@ -15,20 +15,27 @@ const add = (a: Vec2, b: Vec2, k = 1): Vec2 => [a[0] + b[0] * k, a[1] + b[1] * k
 const poly = (p: Vec2[]) => p.map((q) => q.join(",")).join(" ");
 
 /** Blueprint-rutenett. Ligger fast mens veien glir over det. */
-export function Grid() {
+/** Rutenettet tegnes som vanlige linjer: mønstre (pattern) blinker når kartet zoomes. */
+const GRID_EXTENT = 200;
+function gridPath(step: number, skip = 0): string {
+  const parts: string[] = [];
+  for (let k = -GRID_EXTENT; k <= GRID_EXTENT; k += step) {
+    if (skip && k % skip === 0) continue;
+    parts.push(`M${k} ${-GRID_EXTENT}V${GRID_EXTENT}M${-GRID_EXTENT} ${k}H${GRID_EXTENT}`);
+  }
+  return parts.join("");
+}
+const GRID_FINE = gridPath(2, 10);
+const GRID_MAJOR = gridPath(10);
+
+/** `zoom` = piksler per meter. Det fine rutenettet toner ut når kartet er zoomet langt ut. */
+export function Grid({ zoom }: { zoom: number }) {
+  const fine = Math.min(1, Math.max(0, (zoom - 6) / 6));
   return (
-    <>
-      <defs>
-        <pattern id="grid-fine" width={2} height={2} patternUnits="userSpaceOnUse">
-          <path d="M 2 0 L 0 0 0 2" className="grid-fine" />
-        </pattern>
-        <pattern id="grid" width={10} height={10} patternUnits="userSpaceOnUse">
-          <rect width={10} height={10} fill="url(#grid-fine)" />
-          <path d="M 10 0 L 0 0 0 10" className="grid-major" />
-        </pattern>
-      </defs>
-      <rect x={-200} y={-200} width={400} height={400} fill="url(#grid)" />
-    </>
+    <g pointerEvents="none">
+      {fine > 0 && <path d={GRID_FINE} className="grid-fine" opacity={fine} />}
+      <path d={GRID_MAJOR} className="grid-major" />
+    </g>
   );
 }
 

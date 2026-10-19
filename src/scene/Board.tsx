@@ -517,7 +517,7 @@ export function Board() {
       </defs>
       <g transform={`translate(${pz.view.x} ${pz.view.y}) scale(${pz.view.zoom})`}>
         <g transform={GROUND_MATRIX}>
-          <Grid />
+          <Grid zoom={pz.view.zoom} />
           {layers.map(({ scenario: sc, frame, groundOpacity, back }, i) => (
             <g key={sc.id} transform={frame.svg} opacity={groundOpacity} mask={`url(#back-${i})`}>
               <defs>

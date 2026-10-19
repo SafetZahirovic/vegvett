@@ -32,8 +32,8 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 }
 .board:active { cursor: grabbing; }
 
-.grid-fine { fill: none; stroke: var(--bp-grid); stroke-width: 0.05; }
-.grid-major { fill: none; stroke: var(--bp-grid-major); stroke-width: 0.08; }
+.grid-fine { fill: none; stroke: var(--bp-grid); stroke-width: 0.6; vector-effect: non-scaling-stroke; }
+.grid-major { fill: none; stroke: var(--bp-grid-major); stroke-width: 1; vector-effect: non-scaling-stroke; }
 
 .road { fill: var(--bp-road); }
 .road-edge { stroke: var(--bp-dim); stroke-width: 1; vector-effect: non-scaling-stroke; }
@@ -449,7 +449,7 @@ html, body, #root { margin: 0; height: 100%; overflow: hidden; background: var(-
 
 .paint-line { stroke: var(--bp-line); }
 .island { fill: var(--bp-bg); stroke: var(--bp-dim); stroke-width: 1; vector-effect: non-scaling-stroke; }
-.island-inner { fill: none; stroke: var(--bp-grid-major); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 3 3; }
+.island-inner { fill: none; stroke: var(--bp-grid-major); stroke-width: 0.08; stroke-dasharray: 0.4 0.4; }
 .center-line { fill: none; }
 .bluelight { fill: #3d8bff; stroke: none; animation: blink 0.5s steps(1) infinite; }
 .bluelight.is-alt { animation-delay: 0.25s; }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Question, Scenario } from "../scenarios/types";
-import { EXAM_LENGTH, useActiveQuestions, useExamComplete, useGame, useScenario, type Answer, type AnswerValue } from "../state/store";
+import { useActiveQuestions, useExamComplete, useGame, useScenario, type Answer, type AnswerValue } from "../state/store";
 import { articleForTopic } from "../learning";
 import { useProgress } from "../state/progress";
 import { objectName } from "./labels";
@@ -48,7 +48,7 @@ function SceneAnswer({ q, answer, scenario }: { q: Question; answer: Answer; sce
 }
 
 /** Lenke til læringssiden for scenarioets tema, hvis den finnes. */
-function ReadMore({ scenario }: { scenario: Scenario }) {
+export function ReadMore({ scenario }: { scenario: Scenario }) {
   const licence = useProgress((s) => s.licence);
   const article = articleForTopic(scenario.topic, licence);
   if (!article) return null;
@@ -187,7 +187,7 @@ export function QuestionPanel() {
       <div className="question-head">
         <span>
           {isExam
-            ? `Prøve · spørsmål ${Math.min(EXAM_LENGTH, exam.log.length + (given ? 0 : 1))} / ${EXAM_LENGTH}`
+            ? `Prøve · spørsmål ${Math.min(exam.length, exam.log.length + (given ? 0 : 1))} / ${exam.length}`
             : `Spørsmål ${qIndex + 1} / ${questions.length}`}
         </span>
         <span className="question-dots" aria-hidden>

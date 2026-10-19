@@ -1,15 +1,27 @@
 import { useEffect, useState } from "react";
-import { EXAM_LENGTH, EXAM_MINUTES, useExamComplete, useGame, useScenario, useScenarioDone } from "../state/store";
+import {
+  useActiveCategoryTitle,
+  useExamComplete,
+  useGame,
+  useScenario,
+  useScenarioDone,
+} from "../state/store";
 import { useProgress, useStats } from "../state/progress";
 
 /** Nedtelling på prøven. Avslutter prøven når tiden er ute. */
-function ExamClock({ startedAt }: { startedAt: number }) {
+function ExamClock({
+  startedAt,
+  minutes,
+}: {
+  startedAt: number;
+  minutes: number;
+}) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
-  const left = Math.max(0, EXAM_MINUTES * 60 - Math.floor((now - startedAt) / 1000));
+  const left = Math.max(0, minutes * 60 - Math.floor((now - startedAt) / 1000));
   useEffect(() => {
     if (left === 0) useGame.getState().finishExam(true);
   }, [left]);
@@ -25,28 +37,41 @@ function ExamClock({ startedAt }: { startedAt: number }) {
   );
 }
 
+const MODE_LABEL = { ovelse: "Øving", prove: "Prøve", guide: "Guide" } as const;
+
 export function Hud() {
   const scenario = useScenario();
   const mode = useGame((s) => s.mode);
   const exam = useGame((s) => s.exam);
+  const round = useGame((s) => s.round);
+  const categoryTitle = useActiveCategoryTitle();
   const driving = useGame((s) => s.next !== null);
   const showAllRoutes = useGame((s) => s.showAllRoutes);
   const played = useStats().scenariosPlayed;
   const licence = useProgress((s) => s.licence);
   const done = useScenarioDone();
   const examComplete = useExamComplete();
-  const { resetView, advance, toggleAllRoutes, setScreen, finishExam } = useGame.getState();
+  const { resetView, advance, toggleAllRoutes, setScreen, finishExam } =
+    useGame.getState();
 
   return (
     <>
       <header className="hud">
-        <button className="hud-brand" onClick={() => setScreen("menu")} title="Til menyen">
+        <button
+          className="hud-brand"
+          onClick={() => setScreen("menu")}
+          title="Til menyen"
+        >
           <span className="hud-logo">VEGVETT</span>
           <span className="hud-sub">Meny</span>
         </button>
         <div className="hud-actions">
           <label className="toggle">
-            <input type="checkbox" checked={showAllRoutes} onChange={toggleAllRoutes} />
+            <input
+              type="checkbox"
+              checked={showAllRoutes}
+              onChange={toggleAllRoutes}
+            />
             <span>Vis alle kjøreretninger</span>
           </label>
           <button className="btn btn-ghost" onClick={resetView}>
@@ -58,27 +83,46 @@ export function Hud() {
         <div>
           <span className="tb-label">Modus</span>
           <span className="tb-value">
-            {licence === "A" ? "MC" : "Bil"} · {mode === "prove" ? "Prøve" : "Øving"}
+            {licence === "A" ? "MC" : "Bil"} · {MODE_LABEL[mode]}
+            {categoryTitle && ` · ${categoryTitle}`}
           </span>
         </div>
         <div className="tb-main">
           <span className="tb-label">Scenario</span>
-          <span className="tb-value">{driving ? "Kjører …" : scenario.title}</span>
+          <span className="tb-value">
+            {driving ? "Kjører …" : scenario.title}
+          </span>
         </div>
         <div>
-          <span className="tb-label">{mode === "prove" ? "Besvart" : "Spilt"}</span>
-          <span className="tb-value">{mode === "prove" && exam ? `${exam.log.length} / ${EXAM_LENGTH}` : played}</span>
+          <span className="tb-label">
+            {mode === "prove" ? "Besvart" : round ? "Scenario" : "Spilt"}
+          </span>
+          <span className="tb-value">
+            {mode === "prove" && exam
+              ? `${exam.log.length} / ${exam.length}`
+              : round
+                ? `${round.pos + 1} / ${round.order.length}`
+                : played}
+          </span>
         </div>
-        {mode === "prove" && exam && <ExamClock startedAt={exam.startedAt} />}
+        {mode === "prove" && exam && (
+          <ExamClock startedAt={exam.startedAt} minutes={exam.minutes} />
+        )}
       </footer>
-      <button
-        className={`btn btn-next${done && !driving ? " is-ready" : ""}`}
-        onClick={examComplete ? () => finishExam() : advance}
-        disabled={driving || !done}
-        title={done ? undefined : "Svar på spørsmålene først"}
-      >
-        {examComplete ? "Se resultat →" : "Videre →"}
-      </button>
+      {mode !== "guide" && (
+        <button
+          className={`btn btn-next${done && !driving ? " is-ready" : ""}`}
+          onClick={examComplete ? () => finishExam() : advance}
+          disabled={driving || !done}
+          title={done ? undefined : "Svar på spørsmålene først"}
+        >
+          {examComplete
+            ? "Se resultat →"
+            : round && round.pos + 1 >= round.order.length
+              ? "Avslutt runden →"
+              : "Videre →"}
+        </button>
+      )}
     </>
   );
 }

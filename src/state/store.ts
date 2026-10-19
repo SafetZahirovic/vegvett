@@ -4,10 +4,22 @@ import { SCENARIOS } from "../scenarios";
 import type { Licence, Question, Scenario, Topic } from "../scenarios/types";
 import { START_POSE, planTravel, type Pose, type Travel } from "../scene/pose";
 import { useProgress } from "./progress";
+import { categoryById } from "./categories";
 import { forLicence, pickScenario, shuffledScenarioOrder } from "./selection";
 
-export type Mode = "ovelse" | "prove";
+/** Øving, prøve eller guidet kjøring (bilen kjører selv og forklarer). */
+export type Mode = "ovelse" | "prove" | "guide";
 export type Screen = "menu" | "play" | "result" | "stats" | "signs" | "learn";
+
+/** Lagret valg for automatisk kjøring i guiden. */
+const AUTO_DRIVE_KEY = "vegvett-auto-drive";
+function loadAutoDrive(): boolean {
+  try {
+    return localStorage.getItem(AUTO_DRIVE_KEY) !== "0";
+  } catch {
+    return true;
+  }
+}
 
 /** Antall spørsmål i en prøve. */
 export const EXAM_LENGTH = 45;
@@ -45,9 +57,29 @@ type Exam = {
   log: ExamEntry[];
   /** Tidspunkt prøven startet (ms), for nedtellingen. */
   startedAt: number;
+  /** Antall spørsmål, feilgrense og minutter. Kortere når prøven gjelder én kategori. */
+  length: number;
+  maxErrors: number;
+  minutes: number;
+  /** Kategorien prøven gjelder (null = alle). */
+  category: string | null;
   /** Prøven ble avsluttet fordi tiden gikk ut. */
   timedOut?: boolean;
 };
+
+/** En avgrenset runde (øving i én kategori eller guidet kjøring): scenarioene spilles i rekkefølge. */
+type Round = { order: number[]; pos: number; log: ExamEntry[]; category: string | null };
+
+/** Lengde, feilgrense og tid for en prøve, skalert ned når kategorien har få spørsmål. */
+export function examFormat(order: number[]): { length: number; maxErrors: number; minutes: number } {
+  const available = order.reduce((n, i) => n + Math.min(QUESTIONS_PER_VISIT, SCENARIOS[i].questions.length), 0);
+  const length = Math.min(EXAM_LENGTH, available);
+  return {
+    length,
+    maxErrors: Math.floor((length * EXAM_MAX_ERRORS) / EXAM_LENGTH),
+    minutes: Math.max(5, Math.ceil((length * EXAM_MINUTES) / EXAM_LENGTH)),
+  };
+}
 
 export type SelectionKind = "sign" | "vehicle" | "pedestrian" | "animal" | "marker" | "signal";
 export type Selection = { kind: SelectionKind; id: string } | null;
@@ -67,6 +99,18 @@ type GameState = {
   mode: Mode;
   screen: Screen;
   exam: Exam | null;
+  /** Avgrenset runde i øving eller guide, ellers null (uendelig øving). */
+  round: Round | null;
+  /** Valgt kategori i menyen (null = alle). */
+  category: string | null;
+  setCategory: (category: string | null) => void;
+  /** Guide: kjør videre av seg selv, eller vent på «Neste». */
+  autoDrive: boolean;
+  toggleAutoDrive: () => void;
+  /** Start guidet kjøring i valgt kategori. */
+  startGuide: () => void;
+  /** Avslutt en runde (øving i kategori eller guide) og vis oppsummeringen. */
+  finishRound: () => void;
   /** Nylig spilte scenario-id-er (øvingsmodus). */
   recent: string[];
   index: number;
@@ -152,6 +196,19 @@ export const useGame = create<GameState>((set, get) => ({
   mode: "ovelse",
   screen: startArk === null ? "menu" : "play",
   exam: null,
+  round: null,
+  category: null,
+  setCategory: (category) => set({ category }),
+  autoDrive: loadAutoDrive(),
+  toggleAutoDrive: () => {
+    const autoDrive = !get().autoDrive;
+    try {
+      localStorage.setItem(AUTO_DRIVE_KEY, autoDrive ? "1" : "0");
+    } catch {
+      /* lagring er valgfritt */
+    }
+    set({ autoDrive });
+  },
   recent: [],
   index: startIndex,
   qids: pickQuestionIds(SCENARIOS[startIndex]),
@@ -173,9 +230,9 @@ export const useGame = create<GameState>((set, get) => ({
   select: (selected) => set({ selected }),
   resetView: () => set((s) => ({ viewResetToken: s.viewResetToken + 1 })),
   answer: (q, value) => {
-    const { answers, mode, exam, index } = get();
-    if (answers[q.id]) return;
-    if (exam && exam.log.length >= EXAM_LENGTH) return;
+    const { answers, mode, exam, index, round } = get();
+    if (answers[q.id] || mode === "guide") return;
+    if (exam && exam.log.length >= exam.length) return;
     const correct = isCorrect(q, value);
     const scenario = SCENARIOS[index];
     useProgress.getState().recordAnswer(scenario.topic, correct);
@@ -187,6 +244,9 @@ export const useGame = create<GameState>((set, get) => ({
         exam: { ...exam, log: [...exam.log, { scenarioId: scenario.id, questionId: q.id, value, correct }] },
       });
       return;
+    }
+    if (round) {
+      set({ round: { ...round, log: [...round.log, { scenarioId: scenario.id, questionId: q.id, value, correct }] } });
     }
     set((s) => ({
       draft: null,
@@ -222,15 +282,19 @@ export const useGame = create<GameState>((set, get) => ({
   nextQuestion: () => set((s) => ({ qIndex: s.qIndex + 1, highlight: [], picks: [], draft: null })),
   toggleAllRoutes: () => set((s) => ({ showAllRoutes: !s.showAllRoutes })),
   advance: () => {
-    const { next, index, mode, exam, recent } = get();
+    const { next, index, mode, exam, recent, round } = get();
     if (next !== null) return;
-    useProgress.getState().recordScenario();
+    if (mode !== "guide") useProgress.getState().recordScenario();
     const current = SCENARIOS[index].id;
     let target: number;
     if (mode === "prove" && exam) {
-      if (exam.log.length >= EXAM_LENGTH || exam.pos + 1 >= exam.order.length) return get().finishExam();
+      if (exam.log.length >= exam.length || exam.pos + 1 >= exam.order.length) return get().finishExam();
       target = exam.order[exam.pos + 1];
       set({ exam: { ...exam, pos: exam.pos + 1 } });
+    } else if (round) {
+      if (round.pos + 1 >= round.order.length) return get().finishRound();
+      target = round.order[round.pos + 1];
+      set({ round: { ...round, pos: round.pos + 1 } });
     } else {
       const { stats, licence, lastSeen } = useProgress.getState();
       target = pickScenario(stats[licence].topics, [current, ...recent], lastSeen, licence);
@@ -246,6 +310,27 @@ export const useGame = create<GameState>((set, get) => ({
     });
   },
   startPractice: () => {
+    const { category } = get();
+    if (category !== null) {
+      // Én kategori: en runde gjennom alle scenarioene i kategorien, med oppsummering til slutt.
+      const { lastSeen, licence, markSeen } = useProgress.getState();
+      const order = shuffledScenarioOrder(lastSeen, licence, category);
+      if (!order.length) return;
+      markSeen(SCENARIOS[order[0]].id);
+      return set({
+        ...freshScenario(),
+        qids: pickQuestionIds(SCENARIOS[order[0]]),
+        mode: "ovelse",
+        screen: "play",
+        exam: null,
+        round: { order, pos: 0, log: [], category },
+        index: order[0],
+        next: null,
+        recent: [],
+        pose: START_POSE,
+        travel: null,
+      });
+    }
     const { stats, licence, lastSeen, markSeen } = useProgress.getState();
     const { topics, scenariosPlayed } = stats[licence];
     // Første gang: begynn med et rolig scenario for klassen.
@@ -254,18 +339,42 @@ export const useGame = create<GameState>((set, get) => ({
     const index =
       scenariosPlayed === 0 && firstIndex >= 0 ? firstIndex : pickScenario(topics, [], lastSeen, licence);
     markSeen(SCENARIOS[index].id);
-    set({ ...freshScenario(), qids: pickQuestionIds(SCENARIOS[index]), mode: "ovelse", screen: "play", exam: null, index, next: null, recent: [], pose: START_POSE, travel: null });
+    set({ ...freshScenario(), qids: pickQuestionIds(SCENARIOS[index]), mode: "ovelse", screen: "play", exam: null, round: null, index, next: null, recent: [], pose: START_POSE, travel: null });
   },
+  startGuide: () => {
+    const { category } = get();
+    const { lastSeen, licence } = useProgress.getState();
+    const order = shuffledScenarioOrder(lastSeen, licence, category);
+    if (!order.length) return;
+    set({
+      ...freshScenario(),
+      qids: pickQuestionIds(SCENARIOS[order[0]]),
+      mode: "guide",
+      screen: "play",
+      exam: null,
+      round: { order, pos: 0, log: [], category },
+      index: order[0],
+      next: null,
+      recent: [],
+      pose: START_POSE,
+      travel: null,
+      showAllRoutes: false,
+    });
+  },
+  finishRound: () => set({ screen: "result", selected: null, highlight: [], next: null, travel: null }),
   startExam: () => {
+    const { category } = get();
     const { lastSeen, markSeen, licence } = useProgress.getState();
-    const order = shuffledScenarioOrder(lastSeen, licence);
+    const order = shuffledScenarioOrder(lastSeen, licence, category);
+    if (!order.length) return;
     markSeen(SCENARIOS[order[0]].id);
     set({
       ...freshScenario(),
       qids: pickQuestionIds(SCENARIOS[order[0]]),
       mode: "prove",
       screen: "play",
-      exam: { order, pos: 0, log: [], startedAt: Date.now() },
+      exam: { order, pos: 0, log: [], startedAt: Date.now(), ...examFormat(order), category },
+      round: null,
       index: order[0],
       next: null,
       pose: START_POSE,
@@ -278,7 +387,7 @@ export const useGame = create<GameState>((set, get) => ({
     if (screen === "result") return;
     if (exam) {
       // Ubesvarte spørsmål teller som feil, som på den ekte prøven.
-      useProgress.getState().recordExam(exam.log.filter((e) => e.correct).length, EXAM_LENGTH);
+      useProgress.getState().recordExam(exam.log.filter((e) => e.correct).length, exam.length);
       set({ exam: { ...exam, timedOut } });
       useProgress.getState().recordScenario();
     }
@@ -306,6 +415,7 @@ export const useGame = create<GameState>((set, get) => ({
       mode: "ovelse",
       screen: "play",
       exam: null,
+      round: null,
       index,
       next: null,
       recent: [],
@@ -333,24 +443,35 @@ export const useGame = create<GameState>((set, get) => ({
 export const useScenario = (): Scenario => useGame((s) => SCENARIOS[s.index]);
 
 /** Prøven har fått alle spørsmålene sine. */
-export const useExamComplete = (): boolean => useGame((s) => !!s.exam && s.exam.log.length >= EXAM_LENGTH);
+export const useExamComplete = (): boolean => useGame((s) => !!s.exam && s.exam.log.length >= s.exam.length);
 
 /** Alle spørsmål i scenarioet er besvart (eller prøven er ferdig). */
 export const useScenarioDone = (): boolean =>
   useGame(
     (s) =>
       activeQuestions(s).every((q) => s.answers[q.id]) ||
-      (!!s.exam && s.exam.log.length >= EXAM_LENGTH),
+      (!!s.exam && s.exam.log.length >= s.exam.length),
   );
 
 /** Skilt hvis navn skal skjules fordi et ubesvart spørsmål spør etter det. */
 export const useHiddenSigns = (): Set<string> => {
   const questions = useActiveQuestions();
   const answers = useGame((s) => s.answers);
-  return new Set(
-    questions.flatMap((q) => (q.type === "choice" && q.hidesSign && !answers[q.id] ? [q.hidesSign] : [])),
+  const guide = useGame((s) => s.mode === "guide");
+  return useMemo(
+    () =>
+      new Set(
+        guide
+          ? []
+          : questions.flatMap((q) => (q.type === "choice" && q.hidesSign && !answers[q.id] ? [q.hidesSign] : [])),
+      ),
+    [questions, answers, guide],
   );
 };
+
+/** Tittelen på kategorien som gjelder nå (runde eller prøve), eller null for alle. */
+export const useActiveCategoryTitle = (): string | null =>
+  useGame((s) => categoryById(s.exam?.category ?? s.round?.category ?? null)?.title ?? null);
 
 /** Spørsmålet som vises nå, hvis noen. */
 export const useCurrentQuestion = (): Question | undefined =>

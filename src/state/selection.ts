@@ -1,5 +1,6 @@
 import { SCENARIOS } from "../scenarios";
 import type { Licence, Scenario, Topic } from "../scenarios/types";
+import { inCategory } from "./categories";
 import { errorRate, type TopicStat } from "./progress";
 
 /** Vekt for temaer som ikke er prøvd ennå (litt over middels, så de kommer tidlig). */
@@ -31,9 +32,16 @@ function needsDriving(history: string[]): boolean {
 export const forLicence = (s: Scenario, licence: Licence) => (s.licences ?? ["A", "B"]).includes(licence);
 
 /** Scenarioindekser for klassen, sortert fra minst nylig sett (aldri sett først), tilfeldig ved likhet. */
-function byFreshness(lastSeen: Record<string, number>, licence: Licence, random: () => number): number[] {
+function byFreshness(
+  lastSeen: Record<string, number>,
+  licence: Licence,
+  random: () => number,
+  category: string | null = null,
+): number[] {
   const tie = new Map(SCENARIOS.map((s) => [s.id, random()]));
-  const pool = SCENARIOS.map((_, i) => i).filter((i) => forLicence(SCENARIOS[i], licence));
+  const pool = SCENARIOS.map((_, i) => i).filter(
+    (i) => forLicence(SCENARIOS[i], licence) && inCategory(SCENARIOS[i], category),
+  );
   return pool.sort((a, b) => {
     const da = lastSeen[SCENARIOS[a].id] ?? 0;
     const db = lastSeen[SCENARIOS[b].id] ?? 0;
@@ -71,15 +79,17 @@ export function pickScenario(
 }
 
 /**
- * Rekkefølge for en prøve: scenarioene du har sett minst nylig først, ellers tilfeldig.
+ * Rekkefølge for en prøve eller runde: scenarioene du har sett minst nylig først, ellers tilfeldig.
  * Ett teoriscenario etter hvert `THEORY_EVERY - 1` kjørescenario, så lenge det er nok av begge.
+ * `category` begrenser til én kategori (null = alle).
  */
 export function shuffledScenarioOrder(
   lastSeen: Record<string, number> = {},
   licence: Licence = "B",
+  category: string | null = null,
   random = Math.random,
 ): number[] {
-  const all = byFreshness(lastSeen, licence, random);
+  const all = byFreshness(lastSeen, licence, random, category);
   const driving = all.filter((i) => !isTheory(SCENARIOS[i]));
   const theory = all.filter((i) => isTheory(SCENARIOS[i]));
   const order: number[] = [];

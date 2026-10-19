@@ -28,7 +28,7 @@ import { RouteArrow } from "./RouteArrow";
 import { CenterLine, Grid, MainRoad, Markings, RoadFeatures, mainRoadEnd } from "./Ground";
 import { DIR, GROUND_MATRIX, P, depth } from "./iso";
 import { compass, frameFor, playerWorld, travelAt, type Frame } from "./pose";
-import { PLAYER_U } from "./road";
+import { PLAYER_U, ROAD_EXTENT } from "./road";
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -261,6 +261,8 @@ type Layer = {
 const BACK = 40;
 /** Lengden på uttoningen bakerst. */
 const BACK_FADE = 14;
+/** Uttoningen dekker vegen og det som ligger langs den (sykkelveg, kollektivfelt o.l.). */
+const BACK_FADE_HALF_WIDTH = 10.5;
 
 const INACTIVE = { selected: false, hovered: false, highlighted: false, handlers: undefined };
 
@@ -519,21 +521,35 @@ export function Board() {
         <g transform={GROUND_MATRIX}>
           <Grid zoom={pz.view.zoom} />
           {layers.map(({ scenario: sc, frame, groundOpacity, back }, i) => (
-            <g key={sc.id} transform={frame.svg} opacity={groundOpacity} mask={`url(#back-${i})`}>
+            <g key={sc.id} transform={frame.svg} opacity={groundOpacity < 1 ? groundOpacity : undefined}>
+              {/*
+                Vegen slutter bak startplassen i stedet for å gå uendelig langt bakover. Klipping og en
+                uttoning i bakgrunnsfarge brukes i stedet for <mask>: en maske over hele tegningen blir
+                enorm når kartet zoomes inn, og nettleseren mister da deler av tegningen (blinking).
+              */}
               <defs>
-                {/* Vegen toner ut bak startplassen i stedet for å gå uendelig langt bakover */}
-                <linearGradient id={`back-grad-${i}`} gradientUnits="userSpaceOnUse" x1={0} y1={back - BACK_FADE} x2={0} y2={back}>
-                  <stop offset={0} stopColor="#000" />
-                  <stop offset={1} stopColor="#fff" />
+                <clipPath id={`back-clip-${i}`}>
+                  <rect x={-ROAD_EXTENT} y={back - BACK_FADE} width={ROAD_EXTENT * 2} height={ROAD_EXTENT * 2} />
+                </clipPath>
+                <linearGradient id={`back-fade-${i}`} gradientUnits="userSpaceOnUse" x1={0} y1={back - BACK_FADE} x2={0} y2={back}>
+                  <stop offset={0} stopColor="var(--bp-bg)" stopOpacity={1} />
+                  <stop offset={1} stopColor="var(--bp-bg)" stopOpacity={0} />
                 </linearGradient>
-                <mask id={`back-${i}`} maskUnits="userSpaceOnUse" x={-400} y={-400} width={800} height={800}>
-                  <rect x={-400} y={-400} width={800} height={800} fill={`url(#back-grad-${i})`} />
-                </mask>
               </defs>
-              <MainRoad end={mainRoadEnd(sc.road)} />
-              <RoadFeatures road={sc.road} extras={sc.roadExtras} />
-              <CenterLine scenario={sc} highlighted={i === 0 && highlight.includes(CENTER_LINE_ID)} />
-              <Markings markings={sc.markings} highlight={i === 0 ? highlight : []} />
+              <g clipPath={`url(#back-clip-${i})`}>
+                <MainRoad end={mainRoadEnd(sc.road)} />
+                <RoadFeatures road={sc.road} extras={sc.roadExtras} />
+                <CenterLine scenario={sc} highlighted={i === 0 && highlight.includes(CENTER_LINE_ID)} />
+                <Markings markings={sc.markings} highlight={i === 0 ? highlight : []} />
+              </g>
+              <rect
+                x={-BACK_FADE_HALF_WIDTH}
+                y={back - BACK_FADE}
+                width={BACK_FADE_HALF_WIDTH * 2}
+                height={BACK_FADE + 0.01}
+                fill={`url(#back-fade-${i})`}
+                pointerEvents="none"
+              />
               {i === 0 &&
                 routes.map((r) => <RouteArrow key={r.id} route={r.route} color={r.color} startTrim={r.trim} />)}
               {/* Interessepunkter (kun i aktivt scenario) */}

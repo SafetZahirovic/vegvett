@@ -728,8 +728,8 @@ button.hud-brand:hover { border-color: var(--bp-accent); }
 .guide-label { margin: 6px 0 0; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bp-dim); }
 .guide-answer { margin-top: 10px; }
 .guide-driving { margin: 10px 0; color: var(--bp-dim); }
-.guide-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; }
-.guide-actions .btn { flex: 1; }
+.guide-actions { display: flex; align-items: stretch; gap: 8px; margin-top: 12px; }
+.question .guide-actions .btn { flex: 1; width: auto; margin-top: 0; }
 .guide-toggle { margin-top: 10px; min-height: 36px; }
 .guide-timer {
   height: 3px;

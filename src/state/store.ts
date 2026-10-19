@@ -233,7 +233,7 @@ export const useGame = create<GameState>((set, get) => ({
       set({ exam: { ...exam, pos: exam.pos + 1 } });
     } else {
       const { stats, licence, lastSeen } = useProgress.getState();
-      target = pickScenario(stats[licence].topics, new Set([current, ...recent]), lastSeen, licence);
+      target = pickScenario(stats[licence].topics, [current, ...recent], lastSeen, licence);
     }
     set({
       next: target,
@@ -252,7 +252,7 @@ export const useGame = create<GameState>((set, get) => ({
     const firstId = FIRST_SCENARIO_ID[licence];
     const firstIndex = SCENARIOS.findIndex((s) => s.id === firstId);
     const index =
-      scenariosPlayed === 0 && firstIndex >= 0 ? firstIndex : pickScenario(topics, new Set(), lastSeen, licence);
+      scenariosPlayed === 0 && firstIndex >= 0 ? firstIndex : pickScenario(topics, [], lastSeen, licence);
     markSeen(SCENARIOS[index].id);
     set({ ...freshScenario(), qids: pickQuestionIds(SCENARIOS[index]), mode: "ovelse", screen: "play", exam: null, index, next: null, recent: [], pose: START_POSE, travel: null });
   },

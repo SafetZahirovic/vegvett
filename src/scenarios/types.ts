@@ -199,6 +199,8 @@ export type Scenario = {
   title: string;
   topic: Topic;
   difficulty: 1 | 2 | 3;
+  /** «teori» = rene kunnskapsspørsmål uten kjøresituasjon (se `knowledge()`). Utelatt = kjørescenario. */
+  kind?: "teori";
   /** Hvilke klasser scenarioet gjelder for. Utelatt = både bil og MC. */
   licences?: Licence[];
   road: RoadLayout;

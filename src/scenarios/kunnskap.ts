@@ -20,6 +20,7 @@ export function knowledge(opts: {
     id: opts.id,
     title: opts.title,
     topic: opts.topic,
+    kind: "teori",
     difficulty: opts.difficulty ?? 1,
     licences: opts.licences,
     road: { type: "rett" },

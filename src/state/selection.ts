@@ -11,6 +11,22 @@ const ERROR_WEIGHT = 4;
 const FRESH_SHARE = 0.2;
 const MIN_POOL = 4;
 
+/** Høyst ett teoriscenario blant så mange på rad, så teori og kjøring blandes. */
+const THEORY_EVERY = 3;
+
+export const isTheory = (s: Scenario) => s.kind === "teori";
+
+/**
+ * Skal neste scenario være et kjørescenario? Ja hvis noen av de siste `THEORY_EVERY - 1`
+ * (nyeste først) var teori, eller hvis det ikke er spilt noe ennå.
+ */
+function needsDriving(history: string[]): boolean {
+  if (history.length === 0) return true;
+  return history
+    .slice(0, THEORY_EVERY - 1)
+    .some((id) => SCENARIOS.find((s) => s.id === id)?.kind === "teori");
+}
+
 /** Gjelder scenarioet for valgt klasse? Uten `licences` gjelder det både bil og MC. */
 export const forLicence = (s: Scenario, licence: Licence) => (s.licences ?? ["A", "B"]).includes(licence);
 
@@ -28,16 +44,19 @@ function byFreshness(lastSeen: Record<string, number>, licence: Licence, random:
 /**
  * Velger et scenario blant dem du har sett minst nylig (også på tvers av økter), vektet
  * mot temaer du har svart feil på. Slik går alle scenarioene runden før noe gjentas.
- * `exclude` er scenario-id-er som ikke skal velges (f.eks. det som spilles nå).
+ * `history` er scenario-id-ene som er spilt nylig, nyeste først. De velges ikke, og de styrer
+ * blandingen av teori og kjøring.
  */
 export function pickScenario(
   topics: Partial<Record<Topic, TopicStat>>,
-  exclude: Set<string>,
+  history: string[],
   lastSeen: Record<string, number> = {},
   licence: Licence = "B",
   random = Math.random,
 ): number {
-  const all = byFreshness(lastSeen, licence, random);
+  const exclude = new Set(history);
+  const driving = needsDriving(history);
+  const all = byFreshness(lastSeen, licence, random).filter((i) => !driving || !isTheory(SCENARIOS[i]));
   const ordered = all.filter((i) => !exclude.has(SCENARIOS[i].id));
   const poolSize = Math.max(MIN_POOL, Math.ceil(all.length * FRESH_SHARE));
   let candidates = ordered.slice(0, poolSize).map((i) => ({ s: SCENARIOS[i], i }));
@@ -51,11 +70,22 @@ export function pickScenario(
   return candidates[candidates.length - 1].i;
 }
 
-/** Rekkefølge for en prøve: scenarioene du har sett minst nylig først, ellers tilfeldig. */
+/**
+ * Rekkefølge for en prøve: scenarioene du har sett minst nylig først, ellers tilfeldig.
+ * Ett teoriscenario etter hvert `THEORY_EVERY - 1` kjørescenario, så lenge det er nok av begge.
+ */
 export function shuffledScenarioOrder(
   lastSeen: Record<string, number> = {},
   licence: Licence = "B",
   random = Math.random,
 ): number[] {
-  return byFreshness(lastSeen, licence, random);
+  const all = byFreshness(lastSeen, licence, random);
+  const driving = all.filter((i) => !isTheory(SCENARIOS[i]));
+  const theory = all.filter((i) => isTheory(SCENARIOS[i]));
+  const order: number[] = [];
+  while (driving.length || theory.length) {
+    for (let k = 0; k < THEORY_EVERY - 1 && driving.length; k++) order.push(driving.shift()!);
+    if (theory.length) order.push(theory.shift()!);
+  }
+  return order;
 }

@@ -35,7 +35,7 @@ npm run dev
 
 ## Klasser og moduser
 - **Bil (klasse B)** og **MC (klasse A)** velges i menyen. MC har egne scenarioer (plassering i feltet, linjevalg i sving, hjelm, kollektivfelt, gruppekjøring m.m.) og deler de generelle scenarioene med bil. Fremgangen lagres per klasse.
-- **Kategori:** velg «Alle» eller én kategori (f.eks. Vikeplikt og kryss, Skilt og oppmerking, Lover og ansvar) i menyen. Valget gjelder guide, øving og prøve.
+- **Kategori:** når du har valgt guide, øving eller prøve, velger du «Alle kategorier» eller én kategori (f.eks. Vikeplikt og kryss, Skilt og oppmerking, Lover og ansvar).
 - **Guidet kjøring:** bilen kjører selv gjennom situasjonene, markerer det som gjelder i tegningen og forteller hva du skal gjøre. «Kjør automatisk» går videre av seg selv etter lesetiden; slått av går du videre med «Neste» (eller Enter / piltaster).
 - **Øvingsmodus:** med én kategori er øvingen en runde gjennom kategoriens scenarioer, med oppsummering til slutt. Med «Alle» fortsetter den så lenge du vil. Forklaring etter hvert svar. Spillet husker hvilke scenarioer du har sett (også mellom økter) og velger blant dem du ikke har sett på lengst, oftere fra temaer du har svart feil på. Minst 29 andre scenarioer passerer før et scenario kommer igjen. Teori og kjøring blandes: høyst ett rent teoriscenario blant tre på rad, også i prøvemodus. Svaralternativene stokkes på nytt hver gang.
 - **Prøvemodus:** som den ekte teoriprøven – 45 spørsmål, maks 7 feil, 90 minutter. Resultat (bestått/ikke bestått) og forklaringer til slutt. I én kategori blir prøven kortere når kategorien har færre spørsmål, med feilgrense og tid skalert i samme forhold.

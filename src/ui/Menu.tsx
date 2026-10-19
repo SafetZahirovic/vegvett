@@ -1,33 +1,80 @@
 import type { Licence } from "../scenarios/types";
 import { useProgress, useStats } from "../state/progress";
-import { useMemo } from "react";
+import { useState } from "react";
 import { CATEGORIES, categoryCount } from "../state/categories";
 import { shuffledScenarioOrder } from "../state/selection";
-import { examFormat, useGame } from "../state/store";
+import { EXAM_LENGTH, EXAM_MAX_ERRORS, EXAM_MINUTES, examFormat, useGame } from "../state/store";
 
 const LICENCES: { id: Licence; title: string; sub: string }[] = [
   { id: "B", title: "Bil", sub: "Klasse B" },
   { id: "A", title: "MC", sub: "Klasse A" },
 ];
 
-/** Startskjerm: velg klasse, og så øving, prøve eller statistikk. */
+type ModeChoice = "guide" | "ovelse" | "prove";
+
+const MODE_TITLE: Record<ModeChoice, string> = {
+  guide: "Guidet kjøring",
+  ovelse: "Øvingsmodus",
+  prove: "Prøvemodus",
+};
+
+/** Kort beskrivelse av hva du får i en kategori (null = alle) i valgt modus. */
+function categoryDetail(mode: ModeChoice, category: string | null, licence: Licence): string {
+  const count = categoryCount(category, licence);
+  if (mode === "guide") return `${count} situasjoner`;
+  if (mode === "ovelse") return category === null ? "Så lenge du vil" : `Runde med ${count} scenarioer`;
+  const exam = examFormat(shuffledScenarioOrder({}, licence, category));
+  return `${exam.length} spørsmål · maks ${exam.maxErrors} feil · ${exam.minutes} min`;
+}
+
+/** Andre steg i menyen: velg kategori (eller alle) for modusen du valgte. */
+function CategoryStep({ mode, onBack }: { mode: ModeChoice; onBack: () => void }) {
+  const { startPractice, startExam, startGuide, setCategory } = useGame.getState();
+  const licence = useProgress((s) => s.licence);
+  const categories = CATEGORIES.filter((c) => categoryCount(c.id, licence) > 0);
+  const start = (category: string | null) => {
+    setCategory(category);
+    ({ guide: startGuide, ovelse: startPractice, prove: startExam })[mode]();
+  };
+  const options = [{ id: null, title: "Alle kategorier" }, ...categories];
+
+  return (
+    <div className="overlay">
+      <section className="sheet menu" aria-label={`${MODE_TITLE[mode]}: velg kategori`}>
+        <button className="link category-back" onClick={onBack}>
+          ← Tilbake
+        </button>
+        <p className="sheet-kicker">{MODE_TITLE[mode]}</p>
+        <h2 className="category-heading">Velg kategori</h2>
+        <div className="category-list">
+          {options.map((c, i) => (
+            <button
+              key={c.id ?? "alle"}
+              className={`category-option${c.id === null ? " is-all" : ""}`}
+              onClick={() => start(c.id)}
+              autoFocus={i === 0}
+            >
+              <span className="category-option-title">{c.title}</span>
+              <span className="category-option-detail">{categoryDetail(mode, c.id, licence)}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/** Startskjerm: velg klasse og modus, og deretter kategori. */
 export function Menu() {
-  const { startPractice, startExam, startGuide, setScreen, setCategory } = useGame.getState();
-  const category = useGame((s) => s.category);
+  const { setScreen } = useGame.getState();
+  const [mode, setMode] = useState<ModeChoice | null>(null);
   const licence = useProgress((s) => s.licence);
   const setLicence = useProgress((s) => s.setLicence);
   const { topics, scenariosPlayed: played } = useStats();
   const total = Object.values(topics).reduce((a, t) => a + (t?.total ?? 0), 0);
   const correct = Object.values(topics).reduce((a, t) => a + (t?.correct ?? 0), 0);
-  const categories = CATEGORIES.map((c) => ({ ...c, count: categoryCount(c.id, licence) })).filter((c) => c.count > 0);
-  // Valgt kategori finnes kanskje ikke for den andre klassen (f.eks. Motorsykkel for bil).
-  const active = categories.some((c) => c.id === category) ? category : null;
-  const count = categoryCount(active, licence);
-  const exam = useMemo(() => examFormat(shuffledScenarioOrder({}, licence, active)), [licence, active]);
-  const start = (fn: () => void) => () => {
-    if (active !== category) setCategory(active);
-    fn();
-  };
+
+  if (mode) return <CategoryStep mode={mode} onBack={() => setMode(null)} />;
 
   return (
     <div className="overlay">
@@ -51,52 +98,20 @@ export function Menu() {
             </button>
           ))}
         </div>
-        <div className="category-picker" role="radiogroup" aria-label="Kategori">
-          <span className="category-label">Kategori</span>
-          <div className="category-chips">
-            <button
-              role="radio"
-              aria-checked={active === null}
-              className={`chip${active === null ? " is-active" : ""}`}
-              onClick={() => setCategory(null)}
-            >
-              Alle
-            </button>
-            {categories.map((c) => (
-              <button
-                key={c.id}
-                role="radio"
-                aria-checked={active === c.id}
-                className={`chip${active === c.id ? " is-active" : ""}`}
-                onClick={() => setCategory(c.id)}
-              >
-                {c.title} <span className="chip-count">{c.count}</span>
-              </button>
-            ))}
-          </div>
-        </div>
         <div className="menu-actions">
-          <button className="menu-card" onClick={start(startGuide)}>
+          <button className="menu-card" onClick={() => setMode("guide")}>
             <span className="menu-card-title">Guidet kjøring</span>
-            <span>
-              Bilen kjører selv gjennom {count} situasjoner og forteller hva du skal gjøre. Automatisk eller ett steg
-              om gangen.
-            </span>
+            <span>Bilen kjører selv og forteller hva du skal gjøre. Automatisk eller ett steg om gangen.</span>
           </button>
-          <button className="menu-card" onClick={start(startPractice)} autoFocus>
+          <button className="menu-card" onClick={() => setMode("ovelse")} autoFocus>
             <span className="menu-card-title">Øvingsmodus</span>
-            <span>
-              {active === null
-                ? "Forklaring etter hvert svar. Fortsetter så lenge du vil, og temaer du bommer på, kommer oftere."
-                : `En runde gjennom kategoriens ${count} scenarioer, med forklaring etter hvert svar og oppsummering til slutt.`}
-            </span>
+            <span>Forklaring etter hvert svar. Temaer du bommer på, kommer oftere.</span>
           </button>
-          <button className="menu-card" onClick={start(startExam)}>
+          <button className="menu-card" onClick={() => setMode("prove")}>
             <span className="menu-card-title">Prøvemodus</span>
             <span>
-              {active === null ? "Som den ekte teoriprøven: " : "Prøve i kategorien: "}
-              {exam.length} spørsmål, maks {exam.maxErrors} feil og {exam.minutes} minutter. Resultat og forklaringer
-              til slutt.
+              Som den ekte teoriprøven: {EXAM_LENGTH} spørsmål, maks {EXAM_MAX_ERRORS} feil og {EXAM_MINUTES} minutter.
+              Kortere prøve i én kategori.
             </span>
           </button>
         </div>

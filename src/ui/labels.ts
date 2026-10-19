@@ -7,6 +7,7 @@ export const VEHICLE_LABEL: Record<VehicleType, string> = {
   buss: "Buss",
   utrykning: "Utrykningskjøretøy",
   motorsykkel: "Motorsykkel",
+  trikk: "Trikk",
 };
 export const ANIMAL_LABEL: Record<AnimalType, string> = {
   elg: "Elg",
@@ -55,6 +56,10 @@ export const TOPIC_LABEL: Record<Topic, string> = {
   dyr: "Dyr",
   sykkel: "Sykkel",
   motorsykkel: "Motorsykkel",
+  kjoretoy: "Kjøretøy og teknikk",
+  mennesket: "Mennesket i trafikken",
+  sikkerhet: "Sikkerhet og førstehjelp",
+  ansvar: "Lover og ansvar",
 };
 
 /** Lesbar tekst for et svar (brukt på resultatsiden). */

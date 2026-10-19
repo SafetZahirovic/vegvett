@@ -331,6 +331,102 @@ veiledning, er merket «veiledning» i appen og er ikke lovtekst.
 | ☐ | mc-grus-tilhenger / mcgt-a1 | Nei – krever over 125 cm³ | Bruksforskriften § 4-2 nr. 1 |
 
 
+## Runde 4: temaliste-dekning, kunnskapsspørsmål og læring
+
+Temaene følger Statens vegvesens temaliste for teoriprøven klasse B. Fakta er kontrollert av to AI-agenter
+mot Lovdata (trafikkreglene, vegtrafikkloven, bruksforskriften, førerkortforskriften,
+prikkforskriften, verneutstyrforskriften, bilansvarslova, mobilforskriften, bilforskriften) og Statens
+vegvesen (2026-10-19). Ingen tekst eller spørsmål er hentet fra kommersielle øvingssider.
+Innholdet er skrevet for Vegvett.
+
+### Prøveformat
+- ☐ Prøvemodus: 45 spørsmål, maks 7 feil (minst 38 riktige), 90 minutter. Ubesvarte spørsmål teller som feil.
+  Kilde: Statens vegvesen, gjennomføring av teoriprøven.
+
+### Usikkert / bevisst utelatt
+- ⚠ Tommelfingerreglene for stopplengde er bare nevnt i læringsteksten som grove anslag (ikke funnet i norsk kilde).
+- ⚠ Varsellampenes fargebetydning bygger på ISO-konvensjon og instruksjonsbøker, ikke lov.
+- ⚠ «Sov ca. 15 minutter» ved trøtthet er sekundær gjengivelse av vegvesen-råd.
+- ⚠ HLR 30:2-detaljene er standard etter NRR-retningslinjer, men ikke lest i originaldokumentet.
+- Utelatt: tåkelys sammen med nærlys (TR § 15 nr. 5 er uklar), bøtesatser, kø-hale med nødblink.
+
+### Nye spørsmål
+| Status | Scenario / spørsmål | Riktig svar | Henvisning |
+|---|---|---|---|
+| ☐ | k-ansvar / ka-prikker | 8 prikker | Forskrift om prikkbelastning § 4 |
+| ☐ | k-ansvar / ka-provetid | Du får dobbelt antall prikker, fordi du er i prøveperioden | Forskrift om prikkbelastning § 3; førerkortforskriften § 4-2 |
+| ☐ | k-ansvar / ka-mobil | Nei | Forskrift om forbud mot bruk av mobiltelefon under kjøring § 2 |
+| ☐ | k-ansvar / ka-forsikring | Ja | Bilansvarslova §§ 4, 5 og 15 |
+| ☐ | k-ansvar / ka-politi | Følger politiets anvisning | Trafikkreglene § 3 |
+| ☐ | k-ansvar / ka-drikke | Nei | Vegtrafikkloven § 22 femte ledd |
+| ☐ | k-ansvar / ka-promille-provetid | Ja | Vegtrafikkloven § 33 nr. 1; tapsforskriften § 3-1 |
+| ☐ | k-barn-i-bil / kb-135 | Barn under 135 cm | Forskrift om verneutstyr (sikring av barn), Statens vegvesen |
+| ☐ | k-barn-i-bil / kb-airbag | Nei | Forskrift om verneutstyr, Statens vegvesen |
+| ☐ | k-barn-i-bil / kb-ansvar | Føreren | Forskrift om verneutstyr |
+| ☐ | k-barn-i-bil / kb-bakovervendt | Til barnet er minst 4 år | Trygg Trafikk (anbefaling) |
+| ☐ | k-dekk / kd-sommer | 1,6 mm | Bruksforskriften § 1-4 nr. 2 |
+| ☐ | k-dekk / kd-vinter | 3 mm | Bruksforskriften § 1-4 nr. 2 |
+| ☐ | k-dekk / kd-vinterperiode | Fra 1. november til første søndag etter 2. påskedag | Bruksforskriften § 1-4 nr. 2 |
+| ☐ | k-dekk / kd-pigg | Nei | Bruksforskriften § 1-4 nr. 4 |
+| ☐ | k-dekk / kd-dato | Nei | Bruksforskriften § 1-4 nr. 3 |
+| ☐ | k-fletting-rygging / kfr-feltskifte | Ja | Trafikkreglene § 8 nr. 1 |
+| ☐ | k-fletting-rygging / kfr-glidelas | Vekselvis, én fra hvert felt – glidelåsprinsippet | Trafikkreglene § 8 nr. 1 tredje ledd |
+| ☐ | k-fletting-rygging / kfr-akselerasjon | Tilpasser farten til trafikken i feltet du skal inn i | Trafikkreglene § 8 nr. 2 |
+| ☐ | k-fletting-rygging / kfr-rygge | Du har vikeplikt for alle andre | Trafikkreglene § 11 nr. 1 |
+| ☐ | k-fletting-rygging / kfr-motorveg | Nei | Trafikkreglene § 11 nr. 2 |
+| ☐ | k-forerkort / kf-b | 3 500 kg | Førerkortforskriften § 3-1 |
+| ☐ | k-forerkort / kf-tilhenger | Høyst 750 kg | Førerkortforskriften § 3-1 og § 3-5 |
+| ☐ | k-forerkort / kf-brems | Halvparten av bilens egenvekt, og aldri over 750 kg | Bilforskriften § 11-1 |
+| ☐ | k-forerkort / kf-ovelse | Fylt 25 år og hatt førerett i klassen sammenhengende i 5 år | Vegtrafikkloven § 26 |
+| ☐ | k-forerkort / kf-alder | Når du er 16 år | Vegtrafikkloven § 26 |
+| ☐ | k-forerkort / kf-teoriprove | 45 spørsmål, minst 38 riktige, 90 minutter | Statens vegvesen: gjennomføring av teoriprøven |
+| ☐ | k-forstehjelp / bil-a | svh | Vegtrafikkloven § 12; bruksforskriften § 1-6 |
+| ☐ | k-forstehjelp / kf-113 | 113 | Nasjonale nødnumre |
+| ☐ | k-forstehjelp / kf-plikt | Ja | Vegtrafikkloven § 12 |
+| ☐ | k-forstehjelp / kf-puster | Legger personen i stabilt sideleie og følger med på pusten | Norsk resuscitasjonsråd (førstehjelp) |
+| ☐ | k-forstehjelp / kf-hlr | 30 brystkompresjoner og 2 innblåsninger, om igjen | Norsk resuscitasjonsråd (førstehjelp) |
+| ☐ | k-lys-utstyr / kl-fjernlys | Blender av til nærlys, så du ikke blender den møtende | Trafikkreglene § 15 nr. 2 og 3 |
+| ☐ | k-lys-utstyr / kl-parkering | Parkeringslys – hovedlysene skal være slått av | Trafikkreglene § 15 nr. 4 |
+| ☐ | k-lys-utstyr / kl-trekant | Minst 150 meter | Bruksforskriften § 1-6 nr. 2 |
+| ☐ | k-lys-utstyr / kl-vest | Ja | Bruksforskriften § 1-6 nr. 3 |
+| ☐ | k-lys-utstyr / kl-fare | Varsle andre med nødsignallys, varseltrekant eller på annen måte | Bruksforskriften § 1-6 nr. 2 |
+| ☐ | k-mennesket / km-trott | Stanser på et trygt sted og sover en kort stund | Vegtrafikkloven § 21 |
+| ☐ | k-mennesket / km-skikket | Ja | Vegtrafikkloven § 21 |
+| ☐ | k-mennesket / km-promille | Over 0,2 promille | Vegtrafikkloven § 22 |
+| ☐ | k-mennesket / km-trekant | Legemidlet kan påvirke kjøreevnen – les pakningsvedlegget og snakk med lege | Vegtrafikkloven § 21; Legemiddelverkets ordning med varseltrekant |
+| ☐ | k-mennesket / km-syn | Synsstyrke på minst 0,5 med begge øyne samlet | Førerkortforskriften vedlegg 1 § 9 |
+| ☐ | k-mennesket / km-fartsblind | At du ikke kjører for fort – sjekk speedometeret, farten føles lavere enn den er | Statens vegvesens temaliste: sanser |
+| ☐ | k-miljo / kmi-tomgang | Nei | Trafikkreglene § 16 nr. 1 |
+| ☐ | k-miljo / kmi-jevn | Jevn kjøring, planlegging og bruk av motorbrems | Statens vegvesens temaliste: miljøhensyn |
+| ☐ | k-miljo / kmi-takboks | Ja | Statens vegvesens temaliste: miljøhensyn |
+| ☐ | k-miljo / kmi-dekktrykk | Det øker, og veigrepet blir dårligere | Statens vegvesens temaliste: miljøhensyn |
+| ☐ | k-stopplengde / ks-definisjon | Reaksjonslengden pluss bremselengden | Statens vegvesens temaliste: stopplengde, bremselengde, reaksjonslengde |
+| ☐ | k-stopplengde / ks-dobbel | Den blir omtrent fire ganger så lang | Fysikk (bevegelsesenergi øker med farten i andre) |
+| ☐ | k-stopplengde / ks-reaksjonstid | Omtrent 1 sekund | Statens vegvesens temaliste: sanser og reaksjonstid |
+| ☐ | k-stopplengde / ks-glatt | Ja | Statens vegvesens temaliste: vegforhold og veggrep |
+| ☐ | k-stopplengde / ks-abs | Hindrer at hjulene låser seg, slik at du kan styre mens du bremser hardt | Statens vegvesens temaliste: førerstøttesystemer |
+| ☐ | k-teknikk / kt-rod | Stanser så snart det er trygt og undersøker – følg instruksjonsboka | Fargekoden for varsellamper (ISO-standard, bilens instruksjonsbok) |
+| ☐ | k-teknikk / kt-ansvar | Ja | Vegtrafikkloven § 3 og § 21 |
+| ☐ | k-teknikk / kt-kontroll | At rutene er isfrie, lysene virker og det ikke ligger snø på taket | Statens vegvesens temaliste: sikkerhetskontroll |
+| ☐ | k-teknikk / kt-last | Den skal merkes ytterst, og i mørke også med lykt | Bruksforskriften § 3-4 nr. 3 |
+| ☐ | k-teknikk / kt-sikring | Ja | Bruksforskriften § 3-3 |
+| ☐ | k-tunnel / ktu-brann | Setter bilen til siden med nødsignallys og går ut av tunnelen til fots | Statens vegvesen: Brann i tunnel |
+| ☐ | k-tunnel / ktu-telefon | Ja | Statens vegvesen: Brann i tunnel |
+| ☐ | k-tunnel / ktu-rodt | Stanser og kjører ikke inn | Statens vegvesen: Trygg i tunnel |
+| ☐ | k-tunnel / ktu-stans | Nei | Trafikkreglene § 17 nr. 1 a |
+| ☐ | trikk / trikken | stans | Trafikkreglene § 9 nr. 3 |
+| ☐ | trikk / tr-fri-veg | Ja | Trafikkreglene § 10 nr. 2 |
+| ☐ | trikk / tr-forbi | På høyre side | Trafikkreglene § 12 nr. 1 b |
+| ☐ | trikk / tr-fart | Ja | Trafikkreglene § 13 nr. 2 e |
+| ☐ | planovergang / stopplinje | bom | Skiltforskriften § 4 (skilt 134 og 135) |
+| ☐ | planovergang / po-rodt | Stanser ved stopplinjen eller i trygg avstand | Skiltforskriften § 24 (signal 1096) |
+| ☐ | planovergang / po-avstand | Nærmere enn 5 meter | Trafikkreglene § 17 nr. 1 f |
+| ☐ | planovergang / po-sikret | Ja | Trafikkreglene § 10 nr. 2 |
+
+### Læringssider (`src/learning/articles/`)
+- ☐ Alle læringssider er egne tekster med kildeliste nederst. De må gjennomgås på samme måte som spørsmålene.
+
+
 ## Ikke dekket ennå
 - Feltvalg i tofelts rundkjøring (krever at to felt i ringen kan tegnes).
 - Trikk som kjøretøytype.

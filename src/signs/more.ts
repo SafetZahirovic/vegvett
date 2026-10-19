@@ -205,6 +205,8 @@ export const moreSigns: SignDef[] = [
   warning("124", "Farlig vegkryss", pictograms.kryssHoyre, "Varsler et farlig kryss der den vanlige høyreregelen gjelder."),
   warning("126", "Rundkjøring", pictograms.rundkjoring, "Varsler rundkjøring foran."),
   warning("132", "Trafikklyssignal", pictograms.trafikklys, "Varsler trafikklys foran.", false, true),
+  warning("134", "Planovergang med bom", pictograms.utropstegn, "Varsler planovergang med bom. Hold lav fart og vær klar til å stanse."),
+  warning("135", "Planovergang uten bom", pictograms.utropstegn, "Varsler planovergang uten bom. Se etter tog og hold lav fart."),
   warning("140", "Avstand til gangfelt", pictograms.gangfelt, "Varsler gangfelt foran."),
   warning("142", "Barn", pictograms.barn, "Varsler sted der barn ofte ferdes, for eksempel ved skole eller lekeplass."),
   warning("144", "Syklende", pictograms.syklende, "Varsler at syklende ofte krysser eller kjører ut i vegen."),

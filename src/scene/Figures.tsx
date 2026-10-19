@@ -115,6 +115,8 @@ type Shape = {
 const SHAPES: Record<VehicleType, Shape> = {
   personbil: { len: 4.4, wid: 1.8, body: [0.3, 0.95], top: { len: 2.3, wid: 1.6, off: 0.3, h: [0.95, 1.55] }, lights: true },
   sykkel: { len: 1.8, wid: 0.4, body: [0.35, 0.85], top: { len: 0.5, wid: 0.45, off: 0.2, h: [0.85, 1.75] }, lights: false },
+  // Trikk: lang og høy, med strømavtaker-tak.
+  trikk: { len: 18, wid: 2.65, body: [0.4, 3.3], top: { len: 17, wid: 2.3, off: 0, h: [3.3, 3.5] }, lights: true },
   // Motorsykkel med fører: lav, smal kropp og fører sittende litt bak midten.
   motorsykkel: { len: 2.2, wid: 0.75, body: [0.3, 0.95], top: { len: 0.6, wid: 0.6, off: 0.2, h: [0.95, 1.7] }, lights: true },
   buss: { len: 12, wid: 2.55, body: [0.35, 3.0], top: { len: 11.4, wid: 2.35, off: 0.1, h: [3.0, 3.2] }, lights: true },

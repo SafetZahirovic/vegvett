@@ -236,6 +236,47 @@ function Kurve({ at, side, radius }: { at: number; side: "left" | "right"; radiu
   );
 }
 
+/** Sporvidde (meter) for skinnene. */
+const GAUGE = 1.435;
+
+/** Trikkeskinner midt i hvert kjørefelt. */
+function Trikkeskinner({ from = -E, to = E }: { from?: number; to?: number }) {
+  const lanes = [-HW / 2, HW / 2];
+  return (
+    <g>
+      {lanes.flatMap((c) =>
+        [-GAUGE / 2, GAUGE / 2].map((o) => (
+          <line key={`${c}${o}`} x1={c + o} y1={from} x2={c + o} y2={to} className="rail" />
+        )),
+      )}
+    </g>
+  );
+}
+
+/** Jernbane på tvers av vegen: skinner, sviller utenfor vegen og eventuelt bommer. */
+function Jernbane({ at, bom }: { at: number; bom?: boolean }) {
+  const w = HW + SHOULDER;
+  const sleepers: number[] = [];
+  for (let x = -E; x <= E; x += 0.9) if (Math.abs(x) > w + 0.2) sleepers.push(x);
+  return (
+    <g>
+      {sleepers.map((x) => (
+        <rect key={x} x={x - 0.12} y={at - 1.3} width={0.24} height={2.6} className="sleeper" />
+      ))}
+      {[-GAUGE / 2, GAUGE / 2].map((o) => (
+        <line key={o} x1={-E} y1={at + o} x2={E} y2={at + o} className="rail" />
+      ))}
+      {bom &&
+        [
+          [w + 0.6, at - 3, -1],
+          [-w - 0.6, at + 3, 1],
+        ].map(([x, y, k]) => (
+          <line key={y} x1={x} y1={y} x2={x + k * (w + 0.2)} y2={y} className="barrier" />
+        ))}
+    </g>
+  );
+}
+
 /** Kollektivfelt til høyre for kjørefeltet, med «BUSS» malt i feltet. */
 function Kollektivfelt({ from, to }: { from: number; to: number }) {
   const x0 = HW + SHOULDER - 0.3;
@@ -460,6 +501,10 @@ export function RoadFeatures({ road, extras = [] }: { road: RoadLayout; extras?:
           <Smalt key={i} from={x.from} to={x.to} />
         ) : x.type === "kollektivfelt" ? (
           <Kollektivfelt key={i} from={x.from} to={x.to} />
+        ) : x.type === "trikkeskinner" ? (
+          <Trikkeskinner key={i} from={x.from} to={x.to} />
+        ) : x.type === "jernbane" ? (
+          <Jernbane key={i} at={x.at} bom={x.bom} />
         ) : (
           <Sykkelveg key={i} side={x.side} from={x.from} to={x.to} />
         ),

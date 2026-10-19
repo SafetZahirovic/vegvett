@@ -11,7 +11,7 @@ og fotgjengere for å se hva de betyr og hvor de skal kjøre. Deretter svarer du
 Svarer du feil, får du en kort forklaring med henvisning til regelen, og det som gjelder, blir
 markert i tegningen.
 
-Spillet har to klasser, bil (B) og MC (A), med til sammen 58 scenarioer og 150 spørsmål (inntil tre trekkes tilfeldig per besøk), bruker Statens vegvesens offisielle skiltbilder, og har en skiltoversikt med alle 329 skiltene. Det dekker blant annet vikeplikt og høyreregelen,
+Spillet har to klasser, bil (B) og MC (A), med til sammen 72 scenarioer og 219 spørsmål (inntil tre trekkes tilfeldig per besøk), bruker Statens vegvesens offisielle skiltbilder, og har en skiltoversikt med alle 329 skiltene. Det dekker blant annet vikeplikt og høyreregelen,
 forkjørsveg, stopp, rundkjøring, gangfelt, gang- og sykkelveg, buss ved holdeplass, utrykningskjøretøy,
 sperre- og varsellinje, forbikjøring, møteplikt, vegarbeid, motorveg, parkering og stans, fartsgrenser,
 fareskilt og dyr i vegen (elg, rein og sau). Mellom scenarioene kjører bilen ruten sin: den svinger i
@@ -36,7 +36,8 @@ npm run dev
 ## Klasser og moduser
 - **Bil (klasse B)** og **MC (klasse A)** velges i menyen. MC har egne scenarioer (plassering i feltet, linjevalg i sving, hjelm, kollektivfelt, gruppekjøring m.m.) og deler de generelle scenarioene med bil. Fremgangen lagres per klasse.
 - **Øvingsmodus:** forklaring etter hvert svar. Spillet husker hvilke scenarioer du har sett (også mellom økter) og velger blant dem du ikke har sett på lengst, oftere fra temaer du har svart feil på. Minst 29 andre scenarioer passerer før et scenario kommer igjen. Svaralternativene stokkes på nytt hver gang.
-- **Prøvemodus:** 20 spørsmål uten tilbakemelding underveis. Du får resultat med forklaringer til slutt.
+- **Prøvemodus:** som den ekte teoriprøven – 45 spørsmål, maks 7 feil, 90 minutter. Resultat (bestått/ikke bestått) og forklaringer til slutt.
+- **Læring:** egne lesesider per tema, ordnet etter Statens vegvesens temaliste, med kilder og «Øv på dette».
 - Fremgangen (riktig-prosent per tema, antall scenarioer og prøveresultater) lagres i `localStorage`.
 
 Du kan endre valget ditt helt til du trykker «Svar». Hurtigtaster: `1–4` eller `A–D` velger svar, `J`/`N` velger ja/nei, og `Enter` sender svaret eller går videre.

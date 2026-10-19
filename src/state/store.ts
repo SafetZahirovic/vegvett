@@ -1,16 +1,20 @@
 import { useMemo } from "react";
 import { create } from "zustand";
 import { SCENARIOS } from "../scenarios";
-import type { Licence, Question, Scenario } from "../scenarios/types";
+import type { Licence, Question, Scenario, Topic } from "../scenarios/types";
 import { START_POSE, planTravel, type Pose, type Travel } from "../scene/pose";
 import { useProgress } from "./progress";
-import { pickScenario, shuffledScenarioOrder } from "./selection";
+import { forLicence, pickScenario, shuffledScenarioOrder } from "./selection";
 
 export type Mode = "ovelse" | "prove";
-export type Screen = "menu" | "play" | "result" | "stats" | "signs";
+export type Screen = "menu" | "play" | "result" | "stats" | "signs" | "learn";
 
 /** Antall spørsmål i en prøve. */
-export const EXAM_LENGTH = 20;
+export const EXAM_LENGTH = 45;
+/** Flest feil du kan ha og likevel bestå (som på den ekte teoriprøven). */
+export const EXAM_MAX_ERRORS = 7;
+/** Tid på prøven, i minutter. */
+export const EXAM_MINUTES = 90;
 /** Scenarioet nye spillere starter med, per klasse. */
 const FIRST_SCENARIO_ID: Record<Licence, string> = { B: "landevei-80", A: "mc-plassering" };
 /** Så mange spørsmål stilles per besøk i et scenario. Har scenarioet flere, trekkes de tilfeldig. */
@@ -39,6 +43,10 @@ type Exam = {
   /** Posisjon i `order`. */
   pos: number;
   log: ExamEntry[];
+  /** Tidspunkt prøven startet (ms), for nedtellingen. */
+  startedAt: number;
+  /** Prøven ble avsluttet fordi tiden gikk ut. */
+  timedOut?: boolean;
 };
 
 export type SelectionKind = "sign" | "vehicle" | "pedestrian" | "animal" | "marker";
@@ -105,9 +113,17 @@ type GameState = {
   advance: () => void;
   startPractice: () => void;
   startExam: () => void;
-  /** Avslutt prøven og vis resultatet. */
-  finishExam: () => void;
+  /** Avslutt prøven og vis resultatet. `timedOut` når tiden gikk ut. */
+  finishExam: (timedOut?: boolean) => void;
   setScreen: (screen: Screen) => void;
+  /** Læringsside som vises (null = oversikten). */
+  articleId: string | null;
+  /** Skjermen læringsdelen ble åpnet fra, så «Lukk» går tilbake dit. */
+  learnReturn: Screen;
+  openArticle: (id: string | null) => void;
+  closeLearn: () => void;
+  /** Start øving på et scenario med dette temaet. */
+  practiceTopic: (topic: Topic) => void;
   setProgress: (p: number) => void;
   finishTransition: () => void;
 };
@@ -249,7 +265,7 @@ export const useGame = create<GameState>((set, get) => ({
       qids: pickQuestionIds(SCENARIOS[order[0]]),
       mode: "prove",
       screen: "play",
-      exam: { order, pos: 0, log: [] },
+      exam: { order, pos: 0, log: [], startedAt: Date.now() },
       index: order[0],
       next: null,
       pose: START_POSE,
@@ -257,15 +273,47 @@ export const useGame = create<GameState>((set, get) => ({
       showAllRoutes: false,
     });
   },
-  finishExam: () => {
-    const { exam } = get();
+  finishExam: (timedOut = false) => {
+    const { exam, screen } = get();
+    if (screen === "result") return;
     if (exam) {
-      useProgress.getState().recordExam(exam.log.filter((e) => e.correct).length, exam.log.length);
+      // Ubesvarte spørsmål teller som feil, som på den ekte prøven.
+      useProgress.getState().recordExam(exam.log.filter((e) => e.correct).length, EXAM_LENGTH);
+      set({ exam: { ...exam, timedOut } });
       useProgress.getState().recordScenario();
     }
     set({ screen: "result", selected: null, highlight: [] });
   },
-  setScreen: (screen) => set({ screen, selected: null }),
+  setScreen: (screen) =>
+    set((s) => ({ screen, selected: null, ...(screen === "learn" && s.screen !== "learn" ? { learnReturn: s.screen } : {}) })),
+  articleId: null,
+  learnReturn: "menu",
+  openArticle: (articleId) =>
+    set((s) => ({ articleId, screen: "learn", learnReturn: s.screen === "learn" ? s.learnReturn : s.screen })),
+  closeLearn: () => set((s) => ({ screen: s.learnReturn, articleId: null })),
+  practiceTopic: (topic) => {
+    const { licence, lastSeen, markSeen } = useProgress.getState();
+    const candidates = SCENARIOS.map((sc, i) => ({ sc, i })).filter(
+      ({ sc }) => sc.topic === topic && forLicence(sc, licence),
+    );
+    if (!candidates.length) return;
+    candidates.sort((a, b) => (lastSeen[a.sc.id] ?? 0) - (lastSeen[b.sc.id] ?? 0));
+    const index = candidates[0].i;
+    markSeen(SCENARIOS[index].id);
+    set({
+      ...freshScenario(),
+      qids: pickQuestionIds(SCENARIOS[index]),
+      mode: "ovelse",
+      screen: "play",
+      exam: null,
+      index,
+      next: null,
+      recent: [],
+      pose: START_POSE,
+      travel: null,
+      articleId: null,
+    });
+  },
   setProgress: (progress) => set({ progress }),
   finishTransition: () => {
     const { next } = get();

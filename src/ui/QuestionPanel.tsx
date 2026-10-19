@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Question, Scenario } from "../scenarios/types";
 import { EXAM_LENGTH, useActiveQuestions, useExamComplete, useGame, useScenario, type Answer, type AnswerValue } from "../state/store";
+import { articleForTopic } from "../learning";
+import { useProgress } from "../state/progress";
 import { objectName } from "./labels";
 
 /** Tilfeldig rekkefølge på svaralternativene, ny hver gang spørsmålet vises. */
@@ -45,6 +47,18 @@ function SceneAnswer({ q, answer, scenario }: { q: Question; answer: Answer; sce
   return null;
 }
 
+/** Lenke til læringssiden for scenarioets tema, hvis den finnes. */
+function ReadMore({ scenario }: { scenario: Scenario }) {
+  const licence = useProgress((s) => s.licence);
+  const article = articleForTopic(scenario.topic, licence);
+  if (!article) return null;
+  return (
+    <button className="link read-more" onClick={() => useGame.getState().openArticle(article.id)}>
+      Les mer: {article.title}
+    </button>
+  );
+}
+
 function Feedback({ q, answer, scenario }: { q: Question; answer: Answer; scenario: Scenario }) {
   const [open, setOpen] = useState(false);
   if (answer.correct) {
@@ -59,6 +73,7 @@ function Feedback({ q, answer, scenario }: { q: Question; answer: Answer; scenar
           </button>
         )}
         <p className="rule-ref">{q.rule}</p>
+        <ReadMore scenario={scenario} />
       </div>
     );
   }
@@ -69,6 +84,7 @@ function Feedback({ q, answer, scenario }: { q: Question; answer: Answer; scenar
       <p>{q.explanation}</p>
       <p className="rule-ref">{q.rule}</p>
       {q.highlight.length > 0 && <p className="feedback-hint">Det som gjelder her, er markert i tegningen.</p>}
+      <ReadMore scenario={scenario} />
     </div>
   );
 }
@@ -241,7 +257,7 @@ export function QuestionPanel() {
       <div ref={actions}>
         {given &&
           (examComplete ? (
-            <button className="btn btn-primary" onClick={finishExam}>
+            <button className="btn btn-primary" onClick={() => finishExam()}>
               Se resultat
             </button>
           ) : isLast ? (

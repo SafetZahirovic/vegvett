@@ -44,6 +44,10 @@ export type RoadExtra =
    * `side` sett i spillerens kjøreretning. Krysser eventuelle sideveger.
    */
   | { type: "sykkelveg"; side: "left" | "right"; from?: number; to?: number }
+  /** Trikkeskinner i begge kjørefelt langs hovedvegen. */
+  | { type: "trikkeskinner"; from?: number; to?: number }
+  /** Jernbane som krysser vegen ved v = at (planovergang), eventuelt med bom. */
+  | { type: "jernbane"; at: number; bom?: boolean }
   /** Kollektivfelt til høyre for kjørefeltet. */
   | { type: "kollektivfelt"; from: number; to: number }
   /** Smalt vegparti (f.eks. smal bru eller vegarbeid) der bare ett kjøretøy får plass i bredden. */
@@ -72,7 +76,7 @@ export type Marking = {
   width?: number;
 };
 
-export type VehicleType = "personbil" | "sykkel" | "buss" | "utrykning" | "motorsykkel";
+export type VehicleType = "personbil" | "sykkel" | "buss" | "utrykning" | "motorsykkel" | "trikk";
 
 export type Turn = "straight" | "left" | "right" | "uturn" | "pullout" | "pullover";
 
@@ -139,7 +143,11 @@ export type Topic =
   | "fart"
   | "dyr"
   | "sykkel"
-  | "motorsykkel";
+  | "motorsykkel"
+  | "kjoretoy"
+  | "mennesket"
+  | "sikkerhet"
+  | "ansvar";
 
 type QuestionBase = {
   id: string;

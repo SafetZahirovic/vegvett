@@ -1,5 +1,5 @@
 import { SCENARIOS } from "../scenarios";
-import { useGame } from "../state/store";
+import { EXAM_LENGTH, EXAM_MAX_ERRORS, useGame } from "../state/store";
 import { answerLabel } from "./labels";
 
 /** Resultat etter prøvemodus, med forklaring på alle spørsmål. */
@@ -8,8 +8,10 @@ export function ExamResult() {
   const { startExam, startPractice, setScreen } = useGame.getState();
   if (!exam) return null;
   const correct = exam.log.filter((e) => e.correct).length;
-  const total = exam.log.length;
-  const pct = total ? Math.round((correct / total) * 100) : 0;
+  const total = EXAM_LENGTH;
+  const unanswered = total - exam.log.length;
+  const errors = total - correct;
+  const passed = errors <= EXAM_MAX_ERRORS;
 
   return (
     <div className="overlay">
@@ -18,7 +20,14 @@ export function ExamResult() {
         <h1 className="result-score">
           {correct} <span>av {total}</span>
         </h1>
-        <p className="sheet-lead">{pct} % riktige. Gå gjennom forklaringene under – særlig der du svarte feil.</p>
+        <p className={`result-verdict${passed ? " is-pass" : " is-fail"}`}>
+          {passed ? "Bestått" : "Ikke bestått"} – {errors} feil (maks {EXAM_MAX_ERRORS})
+        </p>
+        <p className="sheet-lead">
+          {exam.timedOut && "Tiden gikk ut. "}
+          {unanswered > 0 && `${unanswered} ubesvarte spørsmål teller som feil. `}
+          Gå gjennom forklaringene under – særlig der du svarte feil.
+        </p>
         <ol className="result-list">
           {exam.log.map((e) => {
             const scenario = SCENARIOS.find((s) => s.id === e.scenarioId)!;

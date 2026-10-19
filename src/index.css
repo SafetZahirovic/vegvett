@@ -657,3 +657,38 @@ button.hud-brand:hover { border-color: var(--bp-accent); }
 .poi.is-marker .poi-fill { stroke-dasharray: 4 3; }
 .road-stroke { stroke: var(--bp-road); stroke-linecap: butt; }
 .lane-text { fill: var(--bp-line); font-family: var(--mono); font-weight: 700; font-size: 1.4px; text-anchor: middle; dominant-baseline: middle; opacity: 0.85; }
+.titleblock .is-short .tb-value { color: #ff8a8a; }
+.result-verdict { margin: 0 0 8px; font-family: var(--mono); font-size: 20px; font-weight: 700; }
+.result-verdict.is-pass { color: #57d38c; }
+.result-verdict.is-fail { color: #ff8a8a; }
+
+/* ---------- Læring ---------- */
+
+.learn { width: min(760px, 100%); }
+.article-title { font-size: clamp(26px, 5vw, 34px) !important; letter-spacing: 0.02em !important; color: var(--bp-line) !important; }
+.article p, .article li { line-height: 1.6; font-size: 15.5px; }
+.article ul { padding-left: 20px; }
+.article h2 { color: var(--bp-accent); }
+.article-sources { font-size: 13px; }
+.article-sources a, .article a { color: var(--bp-accent); }
+.article-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.article-link {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  text-align: left;
+  border: 1px solid var(--bp-border);
+  background: rgba(215, 232, 255, 0.04);
+  color: var(--bp-line);
+  font: inherit;
+  cursor: pointer;
+}
+.article-link:hover { border-color: var(--bp-accent); }
+.article-link strong { font-size: 16px; }
+.article-link span { font-size: 13.5px; color: var(--bp-dim); line-height: 1.45; }
+.read-more { margin-top: 8px; }
+.rail { stroke: #9fb3c8; stroke-width: 0.09; }
+.sleeper { fill: #5b4a3a; opacity: 0.6; }
+.barrier { stroke: #ff6b6b; stroke-width: 0.25; stroke-dasharray: 0.6 0.6; }

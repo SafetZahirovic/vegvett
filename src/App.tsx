@@ -3,6 +3,7 @@ import { useGame } from "./state/store";
 import { ExamResult } from "./ui/ExamResult";
 import { Hud } from "./ui/Hud";
 import { InspectPanel } from "./ui/InspectPanel";
+import { Learn } from "./ui/Learn";
 import { Menu } from "./ui/Menu";
 import { SignCatalog } from "./ui/SignCatalog";
 import { QuestionPanel } from "./ui/QuestionPanel";
@@ -24,6 +25,7 @@ export function App() {
       {screen === "stats" && <Stats />}
       {screen === "result" && <ExamResult />}
       {screen === "signs" && <SignCatalog />}
+      {screen === "learn" && <Learn />}
     </div>
   );
 }

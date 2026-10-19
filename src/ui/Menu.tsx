@@ -1,6 +1,6 @@
 import type { Licence } from "../scenarios/types";
 import { useProgress, useStats } from "../state/progress";
-import { EXAM_LENGTH, useGame } from "../state/store";
+import { EXAM_LENGTH, EXAM_MAX_ERRORS, EXAM_MINUTES, useGame } from "../state/store";
 
 const LICENCES: { id: Licence; title: string; sub: string }[] = [
   { id: "B", title: "Bil", sub: "Klasse B" },
@@ -45,7 +45,10 @@ export function Menu() {
           </button>
           <button className="menu-card" onClick={startExam}>
             <span className="menu-card-title">Prøvemodus</span>
-            <span>{EXAM_LENGTH} spørsmål uten hjelp underveis. Du får resultat og forklaringer til slutt.</span>
+            <span>
+              Som den ekte teoriprøven: {EXAM_LENGTH} spørsmål, maks {EXAM_MAX_ERRORS} feil og {EXAM_MINUTES} minutter.
+              Resultat og forklaringer til slutt.
+            </span>
           </button>
         </div>
         <div className="menu-footer">
@@ -55,6 +58,9 @@ export function Menu() {
               : "Ingen fremgang lagret ennå"}
           </span>
           <span className="menu-links">
+            <button className="link" onClick={() => setScreen("learn")}>
+              Læring
+            </button>
             <button className="link" onClick={() => setScreen("signs")}>
               Skiltoversikt
             </button>
